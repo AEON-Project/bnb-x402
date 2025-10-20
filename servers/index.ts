@@ -58,7 +58,7 @@ app.get("/weather", c => {
 app.get("/premium/content", c => {
   return c.json({
     content: "This is premium content accessible via multiple payment methods",
-    supportedPayments: ["USDT on BSC", "USDT on Base", "USDC on Solana"],
+    supportedPayments: ["USDT on BSC"],
   });
 });
 
