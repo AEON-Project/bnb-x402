@@ -7,7 +7,6 @@ This is an example Hono server that demonstrates how to use the `@aeon-ai-pay/x4
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
 - A valid Ethereum address for receiving payments
-- Coinbase Developer Platform API Key & Secret (if accepting payments on Base mainnet) -- get them here [https://portal.cdp.coinbase.com/projects](https://portal.cdp.coinbase.com/projects)
 
 ## Setup
 
@@ -91,17 +90,9 @@ app.use(
 
 You can test the server using one of the example clients:
 
-### Using the Fetch Client
-```bash
-cd ../clients/fetch
-# Ensure .env is setup
-pnpm install
-pnpm dev
-```
-
 ### Using the Axios Client
 ```bash
-cd ../clients/clients
+cd ../clients
 # Ensure .env is setup
 pnpm install
 pnpm dev
@@ -134,4 +125,3 @@ pnpm dev
 - **Better UX**: Users can choose their preferred payment method
 - **Cross-Chain**: Support multiple blockchain ecosystems
 - **Extensible**: Easy to add new networks and tokens
-- **Granular Control**: Different payment options per route
