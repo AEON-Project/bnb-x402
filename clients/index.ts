@@ -24,10 +24,9 @@ const evmClient = createWalletClient({
   chain: bsc as Chain,
 }).extend(publicActions);
 
-// Create the API client with payment interceptor
-// If multiple clients are provided, the payment interceptor will use the first one that is available according to payment requirements
-// You can comment out the evmClient to test the solana client
-const api = withPaymentInterceptor(
+// Create the HTTP client with payment interceptor
+// If multiple wallet clients are provided, the payment interceptor will use the first one that is available according to payment requirements
+const http_client = withPaymentInterceptor(
   axios.create({
     baseURL,
   }),
@@ -36,7 +35,7 @@ const api = withPaymentInterceptor(
   },
 );
 
-api
+http_client
   .get(endpointPath)
   .then(response => {
     console.log(response.data);
