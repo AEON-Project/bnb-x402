@@ -5,7 +5,7 @@ import { paymentMiddleware, Resource, createRouteConfigFromPrice, Network } from
 
 config();
 
-const facilitatorUrl = process.env.FACILITATOR_URL as Resource;
+const facilitatorUrl = process.env.FACILITATOR_URL as Resource;  // https://facilitator.aeon.xyz
 const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
 const network = process.env.NETWORK as Network;
 
@@ -41,7 +41,7 @@ app.use(
       },
     },
     {
-      url: facilitatorUrl,
+      url: facilitatorUrl,  // https://facilitator.aeon.xyz
     },
   ),
 );
