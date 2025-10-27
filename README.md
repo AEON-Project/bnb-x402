@@ -126,7 +126,7 @@ app.use(
       "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress),
     },
     {
-      url: facilitatorUrl,
+      url: facilitatorUrl,  // https://facilitator.aeon.xyz
     },
   ),
 );
@@ -155,7 +155,7 @@ app.use(
       },
     },
     {
-      url: facilitatorUrl,
+      url: facilitatorUrl,  // https://facilitator.aeon.xyz
     },
   ),
 );
@@ -185,7 +185,7 @@ pnpm dev
 
 ## Environment Variables
 
-- `FACILITATOR_URL`: URL of the payment facilitator service
+- `FACILITATOR_URL`: URL of the payment facilitator service （"https://facilitator.aeon.xyz")
 - `NETWORK`: Network to use for simple price configurations ("bsc")
 - `EVM_ADDRESS`: Your Ethereum address for receiving EVM payments
 
