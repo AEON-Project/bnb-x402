@@ -193,10 +193,3 @@ pnpm dev
 
 ### EVM Chains
 - **BSC (Binance Smart Chain)**: USDT (0x55d398326f99059ff775485246999027b3197955)
-
-
-## Architecture Benefits
-
-- **Better UX**: Users can choose their preferred payment method
-- **Cross-Chain**: Support multiple blockchain ecosystems
-- **Extensible**: Easy to add new networks and tokens
