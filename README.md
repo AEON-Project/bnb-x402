@@ -1,5 +1,5 @@
 # BNB Chain x402 payments protocol
-
+![](./static/x402-protocol-flow.png)
 
 # @aeon-ai-pay/x402-axios Example Client
 
