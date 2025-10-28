@@ -1,3 +1,6 @@
+# BNB Chain x402 payments protocol
+
+
 # @aeon-ai-pay/x402-axios Example Client
 
 This is an example client that demonstrates how to use the `@aeon-ai-pay/x402-axios` package to make HTTP requests to endpoints protected by the x402 payment protocol.
