@@ -77,7 +77,16 @@ export function paymentMiddleware(routes: RoutesConfig, facilitator?: Facilitato
 
     // Use the first payment requirement as the primary one
     const primaryRequirement = paymentRequirements[0];
-    const resourceUrl: Resource = (primaryRequirement.resource || c.req.url) as Resource;
+
+    // Priority: configured resource > Origin header > Referer header > server URL
+    const origin = c.req.header("Origin");
+    const referer = c.req.header("Referer");
+    const resourceUrl: Resource = (
+      primaryRequirement.resource ||
+      origin ||
+      referer ||
+      c.req.url
+    ) as Resource;
 
     // Update the resource URL in all payment requirements and validate addresses
     const updatedPaymentRequirements = paymentRequirements.map(requirement => {
