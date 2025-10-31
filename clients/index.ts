@@ -20,13 +20,12 @@ if (!baseURL || !evmPrivateKey || !endpointPath) {
 const evmAccount = privateKeyToAccount(evmPrivateKey);
 const evmClient = createWalletClient({
   account: evmAccount,
-  transport: http(),
+  transport: http("https://bsc.blockrazor.xyz"),
   chain: bsc as Chain,
 }).extend(publicActions);
 
-// Create the HTTP client with payment interceptor
-// If multiple wallet clients are provided, the payment interceptor will use the first one that is available according to payment requirements
-const http_client = withPaymentInterceptor(
+// Create the API client with payment interceptor
+const api = withPaymentInterceptor(
   axios.create({
     baseURL,
   }),
@@ -35,7 +34,7 @@ const http_client = withPaymentInterceptor(
   },
 );
 
-http_client
+api
   .get(endpointPath)
   .then(response => {
     console.log(response.data);
@@ -44,5 +43,5 @@ http_client
     console.log(paymentResponse);
   })
   .catch(error => {
-    console.error("example clients error", error);
+    console.error("example axios error", error);
   });

@@ -1,0 +1,100 @@
+{
+  "name": "@aeon-ai-pay/x402",
+  "version": "0.0.22",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "description": "Aeon's x402 open protocol for blockchain-native payments",
+  "scripts": {
+    "build": "tsc && pnpm run build:paywall && tsc",
+    "build:paywall": "pnpm --filter 'paywall-app' i && pnpm --filter 'paywall-app' build && node ../../../scripts/build-paywall.js",
+    "clean": "rm -rf dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AEON-Project/x402.git"
+  },
+  "keywords": [
+    "x402",
+    "payments",
+    "blockchain",
+    "evm"
+  ],
+  "author": "AeonGPT",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/AEON-Project/x402/issues"
+  },
+  "homepage": "https://github.com/AEON-Project/x402#readme",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js",
+      "default": "./dist/types/index.js"
+    },
+    "./facilitator": {
+      "types": "./dist/facilitator/index.d.ts",
+      "import": "./dist/facilitator/index.js",
+      "default": "./dist/facilitator/index.js"
+    },
+    "./scheme": {
+      "import": {
+        "types": "./dist/scheme/index.d.ts",
+        "import": "./dist/scheme/index.js",
+        "default": "./dist/scheme/index.js"
+      }
+    },
+    "./schemes/exact/evm": {
+      "types": "./dist/schemes/exact/evm/index.d.ts",
+      "import": "./dist/schemes/exact/evm/index.js",
+      "default": "./dist/schemes/exact/evm/index.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware/index.d.ts",
+      "import": "./dist/middleware/index.js",
+      "default": "./dist/middleware/index.js"
+    },
+    "./client": {
+      "import": {
+        "types": "./dist/client/index.d.ts",
+        "import": "./dist/client/index.js",
+        "default": "./dist/client/index.js"
+      }
+    },
+    "./verify": {
+      "import": {
+        "types": "./dist/verify/index.d.ts",
+        "import": "./dist/verify/index.js",
+        "default": "./dist/verify/index.js"
+      }
+    },
+    "./shared": {
+      "import": {
+        "types": "./dist/shared/index.d.ts",
+        "import": "./dist/shared/index.js",
+        "default": "./dist/shared/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "static"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "zod": "^3.25.49"
+  },
+  "dependencies": {
+    "@aeon-ai-pay/x402": "workspace:*",
+    "@types/express": "^5.0.1",
+    "express": "^4.21.2",
+    "next": "15.3.1",
+    "typescript": "^5.8.3",
+    "viem": "^2.28.1"
+  }
+}

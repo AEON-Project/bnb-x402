@@ -21,21 +21,49 @@ console.log("Server is running");
 app.use(
   paymentMiddleware(
     {
-      // Use createRouteConfigFromPrice to construct the RouteConfig
-      "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress),
-      "/premium/*": {
+      // Multiple payment options for /weather route
+      // "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress),
+      "/weather": {
         paymentRequirements: [
           {
             scheme: "exact",
             namespace: "evm",
             tokenAddress: "0x55d398326f99059ff775485246999027b3197955", // USDT on BSC
+            amountRequired: 0.001,
+            amountRequiredFormat: "humanReadable",
+            networkId: "56",
+            payToAddress: evmAddress,
+            description: "Weather data access with USDT",
+            tokenDecimals: 18,
+            tokenSymbol: "USDT",
+          },
+          {
+            scheme: "exact",
+            namespace: "evm",
+            tokenAddress: "0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E", // TESTU on BSC
             amountRequired: 0.01,
             amountRequiredFormat: "humanReadable",
             networkId: "56",
             payToAddress: evmAddress,
-            description: "Premium content access with USDT on BSC",
+            description: "Weather data access with TESTU",
             tokenDecimals: 18,
-            tokenSymbol: "USDT",
+            tokenSymbol: "TESTU",
+          },
+        ],
+      },
+      "/premium/*": {
+        paymentRequirements: [
+          {
+            scheme: "exact",
+            namespace: "evm",
+            tokenAddress: "0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E",
+            amountRequired: 0.01,
+            amountRequiredFormat: "humanReadable",
+            networkId: "56",
+            payToAddress: evmAddress,
+            description: "Premium content access with TESTU",
+            tokenDecimals: 18,
+            tokenSymbol: "TESTU",
           },
         ],
       },

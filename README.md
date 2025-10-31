@@ -29,58 +29,62 @@ The BNB x402 protocol enables HTTP-native blockchain payments for API access. Th
 
 - **HTTP 402 Payment Required**: Standard-based payment protocol
 - **Automatic Payment Handling**: Client SDK handles payment flow automatically
-- **Flexible Payment Options**: Support for native tokens and ERC-20 tokens (e.g., USDT)
+- **Flexible Payment Options**: Supports EIP3009 tokens and ERC-20 tokens (e.g., USDT)
 - **Time-Bound Signatures**: Secure, replay-resistant payment authorizations
 
 ### Architecture
 
-```
-Client Application
-    ↓ [1] GET /api
-Server (402 Payment Required)
-    ↓ [2] Returns payment requirements
-Client SDK
-    ↓ [3] Signs payment with wallet
-    ↓ [4] Retries with X-PAYMENT header
-Server → Facilitator
-    ↓ [5-6] Verifies payment
-Server
-    ↓ [7-11] Processes request & settles payment
-    ↓ [12] Returns 200 OK with content
-Client Application
-```
+![x402 Protocol Flow](./static/x402-protocol-flow.png)
 
+**Flow Description:**
+1. **[1]** Client Application makes GET request to /api
+2. **[2]** Server responds with 402 Payment Required and returns payment requirements
+3. **[3]** The Client SDK uses the wallet to sign payments, and this process includes both pre-authorization and signature.
+4. **[4]** Client retries request with X-PAYMENT header
+5. **[5-6]** Server sends payment to Facilitator for verification
+6. **[7-11]** Server processes request and settles payment
+7. **[12]** Server returns 200 OK with content to Client Application
+
+   
 ---
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ or compatible runtime
+- Node.js v20.18+ or compatible runtime
 - EVM wallet with private key
 - Supported token balance (e.g., USDT on BNB Chain)
 
 ### Installation
 
+```bash
+pnpm install 
+pnpm build  
+```
+
 #### Server Side
 
 ```bash
-npm install hono @hono/node-server @aeon-ai-pay/x402-hono @aeon-ai-pay/x402
+cd servers/
+pnpm dev
+cd ..  
 ```
 
 #### Client Side
 
 ```bash
-npm install axios @aeon-ai-pay/x402-axios viem
+cd clients/
+pnpm  dev
 ```
 
 ### Quick Start - Server
 
 ```typescript
-import { serve } from "@hono/node-server";
-import { Hono } from "hono";
-import { paymentMiddleware } from "@aeon-ai-pay/x402-hono";
-import { createRouteConfigFromPrice } from "@aeon-ai-pay/x402/shared";
+import {serve} from "@hono/node-server";
+import {Hono} from "hono";
+import {paymentMiddleware} from "@aeon-ai-pay/x402-hono";
+import {createRouteConfigFromPrice} from "@aeon-ai-pay/x402/shared";
 
 const app = new Hono();
 const facilitatorUrl = "https://facilitator.aeon.xyz";
@@ -94,30 +98,31 @@ const routeConfig = {
     paymentRequirements: [{
       scheme: "exact",
       namespace: "evm",
-      tokenAddress: "0x55d398326f99059ff775485246999027b3197955", // USDT on BSC
+      tokenAddress: "0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E",
       amountRequired: 0.01,
       amountRequiredFormat: "humanReadable",
       networkId: "56",
       payToAddress: evmAddress,
+      description: "Premium content access with TESTU",
       tokenDecimals: 18,
-      tokenSymbol: "USDT"
-    }]
+      tokenSymbol: "TESTU",
+    },]
   }
 };
 
 // Apply payment middleware
-app.use("*", paymentMiddleware(routeConfig, { url: facilitatorUrl }));
+app.use("*", paymentMiddleware(routeConfig, {url: facilitatorUrl}));
 
 // Protected endpoints
 app.get("/weather", (c) => {
-  return c.json({ report: { weather: "sunny", temperature: 70 } });
+  return c.json({report: {weather: "sunny", temperature: 70}});
 });
 
 app.get("/premium/content", (c) => {
-  return c.json({ content: "Premium content" });
+  return c.json({content: "Premium content"});
 });
 
-serve({ fetch: app.fetch, port: 4021 });
+serve({fetch: app.fetch, port: 4021});
 ```
 
 ### Quick Start - Client
@@ -151,22 +156,45 @@ console.log(response.data);
 
 ### Step-by-Step Flow
 
+
+
+### Payment Types
+
+The x402 protocol supports two payment types:
+
+#### 1.EIP3009 Authorization 
+
+EIP3009 Pre-authorized payment signature that the facilitator can execute.
+
+During pre-authorization, users only need to sign the EIP-3009 authorization once in their wallet. Afterwards, the merchant can directly deduct the payment for gas within the validity period, Users do not need to pay gas, without requiring the user to confirm again
+
+
+```typescript
+{
+  type: "authorizationEip3009",
+  signature: "0x...",
+  nonce: "0x...",
+  version: 1,
+  validAfter: 1234567890,
+  validBefore: 1234567999,
+  from: "0xClientAddress",
+  to: "0xServerAddress",
+  value: "10000000000000000" // Wei
+}
+```
+#### Payment process
 1. **Initial Request**: Client makes standard HTTP request
 2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
 3. **Payment Selection**: Client SDK selects appropriate payment method
-4. **Signature Creation**: Client signs payment authorization with wallet
+4. **Signature creation and create payload**: The step of pre-authorization involves directly invoking the contract to sign using the payload information.
 5. **Retry with Payment**: Client retries request with `X-PAYMENT` header
 6. **Verification**: Server sends payment to facilitator for verification
 7. **Content Delivery**: Server processes request and returns content
 8. **Settlement**: Server settles payment on-chain via facilitator
 9. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` header
+  
 
-### Payment Types
-
-The x402 protocol supports three payment types:
-
-#### 1. Authorization (Recommended)
-
+#### 2.ERC-20 Authorization 
 Pre-authorized payment signature that the facilitator can execute.
 
 ```typescript
@@ -182,30 +210,22 @@ Pre-authorized payment signature that the facilitator can execute.
   value: "10000000000000000" // Wei
 }
 ```
+#### Payment process
+1. **Initial Request**: Client makes standard HTTP request
+2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
+3. **Payment Selection**: Client SDK selects appropriate payment method
+4. **Signature creation and create payload**: This pre-authorization process consists of two steps
+     1. Pre-authorized credit limit and payment amount;
+     2. Utilize payload information and employ a contract to generate a signature.
+5. **Retry with Payment**: Client retries request with `X-PAYMENT` header
+6. **Verification**: Server sends payment to facilitator for verification
+7. **Content Delivery**: Server processes request and returns content
+8. **Settlement**: Server settles payment on-chain via facilitator
+9. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` header
 
-#### 2. Signed Transaction
 
-Fully signed transaction ready for broadcast.
+> Submit the payment payload and paymentRequirements object, and let the facilitator complete the verification and settlement. The verification by the facilitator is all done by the contract. Please refer to the address:[aeon-facilitator-contract](https://github.com/AEON-Project/aeon-facilitator-contract/tree/main).
 
-```typescript
-{
-  type: "signedTransaction",
-  signedTransaction: "0x...",
-  signedMessage?: "0x..."
-}
-```
-
-#### 3. Sign and Send Transaction
-
-Transaction hash of already-broadcast transaction.
-
-```typescript
-{
-  type: "signAndSendTransaction",
-  transactionHash: "0x...",
-  signedMessage: "0x..."
-}
-```
 
 ---
 
@@ -285,7 +305,7 @@ interface RouteConfig {
 ```typescript
 interface PaymentRequirement {
   scheme: "exact";
-  namespace: "evm" | "solana";
+  namespace: "evm";
   tokenAddress: string;
   amountRequired: number | bigint;
   amountRequiredFormat: "humanReadable" | "smallestUnit";
@@ -333,10 +353,41 @@ const client = withPaymentInterceptor(
 ```
 
 ### Signing Functions
+#### `signAuthorizationEip3009(client, authParams, paymentRequirements)`
+
+Signs a payment authorization (EIP-3009 style, this process includes both pre-authorization and signature.).
+
+**Parameters:**
+
+- `client`: `WalletClient` - Viem wallet client
+- `authParams`: `AuthorizationParams` - Authorization parameters
+- `paymentRequirements`: `PaymentRequirement` - Payment requirements
+
+**Returns:** `Promise<EvmPaymentPayload>`
+
+**Example:**
+
+```typescript
+import { signAuthorizationEip3009 } from "@aeon-ai-pay/x402/schemes/exact/evm";
+
+const payload = await signAuthorizationEip3009(
+  walletClient,
+  {
+    from: "0xClientAddress",
+    to: "0xServerAddress",
+    value: BigInt("10000000000000000"),
+    validAfter: Math.floor(Date.now() / 1000),
+    validBefore: Math.floor(Date.now() / 1000) + 300
+  },
+  paymentRequirement
+);
+```
+
+
 
 #### `signAuthorization(client, authParams, paymentRequirements)`
 
-Signs a payment authorization (EIP-3009 style).
+Signs a payment authorization (Pre-authorized style).
 
 **Parameters:**
 
@@ -364,29 +415,7 @@ const payload = await signAuthorization(
 );
 ```
 
-#### `signTransaction(client, txParams, paymentRequirements)`
 
-Signs a complete transaction.
-
-**Parameters:**
-
-- `client`: `WalletClient`
-- `txParams`: `TransactionParams`
-- `paymentRequirements`: `PaymentRequirement`
-
-**Returns:** `Promise<EvmPaymentPayload>`
-
-#### `signAndSendTransaction(client, txParams, paymentRequirements)`
-
-Signs and broadcasts a transaction.
-
-**Parameters:**
-
-- `client`: `WalletClient`
-- `txParams`: `TransactionParams`
-- `paymentRequirements`: `PaymentRequirement`
-
-**Returns:** `Promise<EvmPaymentPayload>`
 
 ---
 
@@ -416,7 +445,7 @@ For EVM-compatible networks, payment requirements specify:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `scheme` | `"exact"` | Yes | Payment scheme (only "exact" supported) |
-| `namespace` | `"evm"` \| `"solana"` | Yes | Blockchain namespace |
+| `namespace` | `"evm"` | Yes | Blockchain namespace |
 | `tokenAddress` | `string` | Yes | Token contract address (use zero address for native) |
 | `amountRequired` | `number` \| `bigint` | Yes | Payment amount |
 | `amountRequiredFormat` | `"humanReadable"` \| `"smallestUnit"` | Yes | Amount format specification |
@@ -521,6 +550,7 @@ When payment verification fails, the response includes an `invalidReason`:
 | Network | Chain ID | Native Token | Example Token Address |
 |---------|----------|--------------|----------------------|
 | BNB Chain (BSC) | 56 | BNB | USDT: `0x55d398326f99059ff775485246999027b3197955` |
+| BNB Chain (BSC) | 56 | BNB | TESTU: `0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E` |
 
 
 ### Token Addresses
@@ -786,12 +816,11 @@ const config = {
 
 ### Client Functions
 
-| Function | Purpose |
-|----------|---------|
+| Function | Purpose                       |
+|----------|-------------------------------|
 | `withPaymentInterceptor(axios, wallet, options?)` | Add payment handling to Axios |
-| `signAuthorization(client, params, requirements)` | Sign payment authorization |
-| `signTransaction(client, params, requirements)` | Sign payment transaction |
-| `signAndSendTransaction(client, params, requirements)` | Sign and broadcast transaction |
+| `signAuthorization(client, params, requirements)` | Sign payment authorization    |
+| `signAuthorizationEip3009(client, params, requirements)` | Sign payment authorization, this process includes both pre-authorization and signature.  |
 
 ### Core Types
 
@@ -807,7 +836,7 @@ const config = {
 ## Support & Resources
 
 - **Documentation**: [https://docs.aeon.xyz](https://docs.aeon.xyz)
-- **GitHub**: [https://github.com/aeon-protocol/x402](https://github.com/aeon-protocol/x402)
+- **GitHub**: [https://github.com/AEON-Project/upload_sdk](https://github.com/AEON-Project/upload_sdk)
 - **NPM Packages**:
   - `@aeon-ai-pay/x402` - Core library
   - `@aeon-ai-pay/x402-hono` - Hono middleware
