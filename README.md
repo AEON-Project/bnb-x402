@@ -852,5 +852,5 @@ This implementation follows the x402 protocol specification. See individual pack
 ---
 
 **Last Updated:** October 2025
-**Protocol Version:** x402 v1
+**Protocol Version:** x402 V0.0.1
 **Implementation Version:** 0.0.22

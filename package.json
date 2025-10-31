@@ -1,6 +1,6 @@
 {
   "name": "x402-workspace",
-  "version": "1.0.0",
+  "version": "0.0.22",
   "private": true,
   "scripts": {
     "build": "pnpm -r build",
