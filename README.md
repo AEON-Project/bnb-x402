@@ -836,7 +836,6 @@ const config = {
 ## Support & Resources
 
 - **Documentation**: [https://docs.aeon.xyz](https://docs.aeon.xyz)
-- **GitHub**: [https://github.com/AEON-Project/upload_sdk](https://github.com/AEON-Project/upload_sdk)
 - **NPM Packages**:
   - `@aeon-ai-pay/x402` - Core library
   - `@aeon-ai-pay/x402-hono` - Hono middleware
