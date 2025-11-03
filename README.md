@@ -843,7 +843,6 @@ const config = {
 - **Facilitator**: [https://facilitator.aeon.xyz](https://facilitator.aeon.xyz)
 - **Demo**: [https://x402-demo.aeon.xyz/weather](https://x402-demo.aeon.xyz/weather)
 
-
 ---
 
 ## License
