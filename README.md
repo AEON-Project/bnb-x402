@@ -841,6 +841,8 @@ const config = {
   - `@aeon-ai-pay/x402-hono` - Hono middleware
   - `@aeon-ai-pay/x402-axios` - Axios interceptor
 - **Facilitator**: [https://facilitator.aeon.xyz](https://facilitator.aeon.xyz)
+- **Demo**: [https://x402-demo.aeon.xyz/weather](https://x402-demo.aeon.xyz/weather)
+
 
 ---
 
