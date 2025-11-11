@@ -224,7 +224,7 @@ Pre-authorized payment signature that the facilitator can execute.
 9. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` header
 
 
-> Submit the payment payload and paymentRequirements object, and let the facilitator complete the verification and settlement. The verification by the facilitator is all done by the contract. Please refer to the address:[aeon-facilitator-contract](https://github.com/AEON-Project/aeon-facilitator-contract/tree/main).
+> Submit the payment payload and paymentRequirements object, and let the facilitator complete the verification and settlement.
 
 
 ---
