@@ -1,4 +1,4 @@
-import { toJsonSafe } from "../shared";
+import { toJsonSafe } from "../shared/index.js";
 import { FacilitatorConfig } from "../types";
 import {
   PaymentRequirements,
