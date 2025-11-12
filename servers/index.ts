@@ -8,6 +8,7 @@ config();
 const facilitatorUrl = process.env.FACILITATOR_URL as Resource;  // https://facilitator.aeon.xyz
 const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
 const network = process.env.NETWORK as Network;
+const apiKey = process.env.API_KEY as string;
 
 if (!facilitatorUrl || !evmAddress || !network) {
   console.error("Missing required environment variables");
@@ -70,6 +71,16 @@ app.use(
     },
     {
       url: facilitatorUrl,  // https://facilitator.aeon.xyz
+      createAuthHeaders: async () => {
+        return {
+          verify: {
+            'Authorization': `Bearer ${apiKey}`
+          },
+          settle: {
+            'Authorization': `Bearer ${apiKey}`
+          }
+        };
+      }
     },
   ),
 );
