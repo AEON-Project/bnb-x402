@@ -12,7 +12,7 @@ Aeon's x402 open protocol for blockchain-native payments.
 ## Installation
 
 ```bash
-npm install @aeon-ai-pay/x402
+pnpm install 
 ```
 
 ## Usage
@@ -54,7 +54,7 @@ The package now includes a static HTML paywall bundle that can be served directl
 To build the static HTML paywall bundle:
 
 ```bash
-npm run build:paywall
+pnpm run build:paywall
 ```
 
 This will build the paywall-app with static export and copy the output to the [`src/shared/paywall/paywallHtml.ts`](./src/shared/paywall/paywallHtml.ts) directory.

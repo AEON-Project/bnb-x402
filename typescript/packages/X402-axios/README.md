@@ -5,7 +5,7 @@ A utility package that extends Axios to automatically handle 402 Payment Require
 ## Installation
 
 ```bash
-npm install @aeon-ai-pay/x402-axios
+pnpm install 
 ```
 
 ## Quick Start

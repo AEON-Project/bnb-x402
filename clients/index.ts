@@ -2,8 +2,7 @@ import axios from "axios";
 import { config } from "dotenv";
 import { Chain, createWalletClient, http, publicActions, type Hex } from "viem";
 import { withPaymentInterceptor, decodeXPaymentResponse } from "@aeon-ai-pay/x402-axios";
-import { privateKeyToAccount } from "viem/accounts";
-import { bsc } from "viem/chains";
+import { evm } from "@aeon-ai-pay/x402/types";
 
 config();
 
@@ -17,12 +16,10 @@ if (!baseURL || !evmPrivateKey || !endpointPath) {
 }
 
 // EVM client
-const evmAccount = privateKeyToAccount(evmPrivateKey);
-const evmClient = createWalletClient({
-  account: evmAccount,
-  transport: http("https://bsc.blockrazor.xyz"),
-  chain: bsc as Chain,
-}).extend(publicActions);
+const evmClient = evm.createSignerBase(evmPrivateKey);
+/*const evmClient = evm.createSignerBsc(evmPrivateKey);
+const evmClient = evm.createSignerXLayer(evmPrivateKey);*/
+
 
 // Create the API client with payment interceptor
 const api = withPaymentInterceptor(

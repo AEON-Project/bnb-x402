@@ -10,7 +10,10 @@ This is an example client that demonstrates how to use the `@aeon-ai-pay/x402-ax
 
 1. Install and build all packages from the typescript examples root:
 ```bash
+cd ../
 pnpm install
+pnpm build
+cd clients
 ```
 
 2. Copy `.env-example` to `.env` :

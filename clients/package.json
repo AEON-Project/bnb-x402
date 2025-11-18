@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^1.7.9",
     "dotenv": "^16.5.0",
+    "@aeon-ai-pay/x402": "workspace:*",
     "@aeon-ai-pay/x402-axios": "workspace:*",
     "viem": "^2.23.1"
   },

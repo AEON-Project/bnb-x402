@@ -269,7 +269,7 @@ Helper to create route config from a price string.
 **Parameters:**
 
 - `price`: `string` - Price in format `"$0.001"`
-- `network`: `string` - Network identifier (e.g., `"bsc"`, `"polygon"`)
+- `network`: `string` - Network identifier (e.g., `"bsc"`, `"base"`, `"XLayer"`)
 - `payToAddress`: `string` - EVM address to receive payment
 
 **Returns:** `RouteConfig`

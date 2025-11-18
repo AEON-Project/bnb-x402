@@ -142,10 +142,76 @@ async function signAuthorizationEip3009(
         const validAfter = BigInt(currentTime - 60); // 1 minute before current time for safety
         const validBefore = BigInt(currentTime + (estimatedProcessingTime ?? 600)); // 10 minutes from now
 
-        // const verifyingContract = "0x555e3311a9893c9B17444C1Ff0d88192a57Ef13e";
-        const {domain} = await client.getEip712Domain({
-            address: tokenAddress?.toLowerCase() as Hex,
-        });
+        // Get EIP-712 domain information from contract
+        let domain;
+        try {
+            // Try standard eip712Domain() function first
+            const result = await client.getEip712Domain({
+                address: tokenAddress?.toLowerCase() as Hex,
+            });
+            domain = result.domain;
+            console.log("[DEBUG] Successfully got domain from eip712Domain():", domain);
+        } catch (domainError) {
+            console.log("[DEBUG] eip712Domain() failed, trying to construct from contract data...");
+
+            // Try to construct domain by reading individual fields from contract
+            try {
+                const contractAddress = tokenAddress?.toLowerCase() as Hex;
+
+                // Try to read common domain-related functions
+                const [name, version, domainSeparator] = await Promise.allSettled([
+                    // Try to read name()
+                    client.readContract({
+                        address: contractAddress,
+                        abi: [{ name: "name", type: "function", inputs: [], outputs: [{ name: "", type: "string" }], stateMutability: "view" }],
+                        functionName: "name",
+                    }),
+                    // Try to read version() - some contracts may have this function
+                    client.readContract({
+                        address: contractAddress,
+                        abi: [{ name: "version", type: "function", inputs: [], outputs: [{ name: "", type: "string" }], stateMutability: "view" }],
+                        functionName: "version",
+                    }),
+                    // Try to read DOMAIN_SEPARATOR()
+                    client.readContract({
+                        address: contractAddress,
+                        abi: [{ name: "DOMAIN_SEPARATOR", type: "function", inputs: [], outputs: [{ name: "", type: "bytes32" }], stateMutability: "view" }],
+                        functionName: "DOMAIN_SEPARATOR",
+                    })
+                ]);
+
+                // Check if we got the necessary data
+                if (name.status !== "fulfilled") {
+                    throw new Error("Contract does not have name() function");
+                }
+
+                if (version.status !== "fulfilled") {
+                    throw new Error("Contract does not have version() function");
+                }
+
+                const tokenName = name.value as string;
+                const tokenVersion = version.value as string;
+
+                if (domainSeparator.status === "fulfilled") {
+                    console.log("[DEBUG] Got DOMAIN_SEPARATOR from contract:", domainSeparator.value);
+                }
+
+                // Construct domain information
+                domain = {
+                    name: tokenName,
+                    version: tokenVersion,
+                    chainId: BigInt(parseInt(networkId)),
+                    verifyingContract: contractAddress,
+                };
+
+                console.log("[DEBUG] Constructed domain from contract data:", domain);
+
+            } catch (contractReadError) {
+                console.error("[DEBUG] Failed to read contract data:", contractReadError);
+                const errorMessage = contractReadError instanceof Error ? contractReadError.message : String(contractReadError);
+                throw new Error(`Contract does not support EIP-712 domain functions: ${errorMessage}`);
+            }
+        }
         const data = {
             types: {
                 TransferWithAuthorization: [

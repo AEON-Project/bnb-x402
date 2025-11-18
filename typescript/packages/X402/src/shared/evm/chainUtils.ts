@@ -1,5 +1,4 @@
-import { base, bsc, mainnet, polygon, sei } from "viem/chains";
-import { type Chain } from "viem/chains";
+import { base, bsc, mainnet, polygon, sei, type Chain } from "viem/chains";
 
 type ChainConfig = {
   chain: Chain;
@@ -13,6 +12,29 @@ type ChainRegistry = {
 };
 
 const FALLBACK_CHAIN_ID = "1";
+
+// X Layer chain definition
+const xlayer: Chain = {
+  id: 196,
+  name: 'X Layer',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'OKB',
+    symbol: 'OKB',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://xlayerrpc.okx.com'],
+    },
+    public: {
+      http: ['https://xlayerrpc.okx.com'],
+    },
+  },
+  blockExplorers: {
+    default: { name: 'OKLink', url: 'https://www.oklink.com/xlayer' },
+  },
+  testnet: false,
+};
 
 const chains: ChainRegistry = {
   "1": {
@@ -45,12 +67,18 @@ const chains: ChainRegistry = {
     nativeTokenDecimals: 18,
     nativeTokenSymbol: "SEI",
   },
+  "196": {
+    chain: xlayer,
+    rpcEnvVariable: "XLAYER_RPC_URL",
+    nativeTokenDecimals: 18,
+    nativeTokenSymbol: "OKB",
+  },
 } as const;
 
 function getChain(chainId: string): Chain {
   if (!chains[chainId]) {
     console.warn(
-      `Chain ID ${chainId} not found, falling back to default chain ${FALLBACK_CHAIN_ID}`
+        `Chain ID ${chainId} not found, falling back to default chain ${FALLBACK_CHAIN_ID}`
     );
   }
   return chains[chainId]?.chain ?? chains[FALLBACK_CHAIN_ID].chain;
@@ -59,11 +87,11 @@ function getChain(chainId: string): Chain {
 function getRPCEnvVariable(chainId: string): string {
   if (!chains[chainId]) {
     console.warn(
-      `Chain ID ${chainId} not found, falling back to default chain ${FALLBACK_CHAIN_ID}`
+        `Chain ID ${chainId} not found, falling back to default chain ${FALLBACK_CHAIN_ID}`
     );
   }
   return (
-    chains[chainId]?.rpcEnvVariable ?? chains[FALLBACK_CHAIN_ID].rpcEnvVariable
+      chains[chainId]?.rpcEnvVariable ?? chains[FALLBACK_CHAIN_ID].rpcEnvVariable
   );
 }
 

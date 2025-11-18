@@ -19,7 +19,10 @@ cp .env-local .env
 2. Install and build all packages from the typescript examples root:
 
 ```bash
+cd ../
 pnpm install
+pnpm build
+cd servers
 ```
 
 3. Run the server

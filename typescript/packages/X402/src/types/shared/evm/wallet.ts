@@ -15,28 +15,51 @@ import type {
   PublicClient,
   LocalAccount,
 } from "viem";
-import { base, avalanche, baseSepolia, avalancheFuji, iotex, bsc, polygon, sei } from "viem/chains";
-import { privateKeyToAccount } from "viem/accounts";
-import { type Hex } from "viem";
-import { EvmNetworkToChainId } from "../network.js";
+import {base, avalanche, baseSepolia, avalancheFuji, iotex, bsc, polygon, sei} from "viem/chains";
+import {privateKeyToAccount} from "viem/accounts";
+import {type Hex} from "viem";
+import {EvmNetworkToChainId} from "../network.js";
+
+// X Layer chain definition
+const xlayer: Chain = {
+  id: 196,
+  name: 'X Layer',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'OKB',
+    symbol: 'OKB',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://xlayerrpc.okx.com'],
+    },
+    public: {
+      http: ['https://xlayerrpc.okx.com'],
+    },
+  },
+  blockExplorers: {
+    default: { name: 'OKLink', url: 'https://www.oklink.com/xlayer' },
+  },
+  testnet: false,
+};
 
 // Create a public client for reading data
 export type SignerWallet<
-  chain extends Chain = Chain,
-  transport extends Transport = Transport,
-  account extends Account = Account
+    chain extends Chain = Chain,
+    transport extends Transport = Transport,
+    account extends Account = Account
 > = Client<
-  transport,
-  chain,
-  account,
-  RpcSchema,
-  PublicActions<transport, chain, account> & WalletActions<chain, account>
+    transport,
+    chain,
+    account,
+    RpcSchema,
+    PublicActions<transport, chain, account> & WalletActions<chain, account>
 >;
 
 export type ConnectedClient<
-  transport extends Transport = Transport,
-  chain extends Chain | undefined = Chain,
-  account extends Account | undefined = undefined
+    transport extends Transport = Transport,
+    chain extends Chain | undefined = Chain,
+    account extends Account | undefined = undefined
 > = PublicClient<transport, chain, account>;
 
 /**
@@ -47,7 +70,7 @@ export type ConnectedClient<
  * @throws Error if the network ID is not supported
  */
 export function getPublicClient(
-  networkId: string
+    networkId: string
 ): ConnectedClient<Transport, any, undefined> {
   switch (networkId) {
     case EvmNetworkToChainId.get("base")?.toString():
@@ -55,13 +78,15 @@ export function getPublicClient(
     case EvmNetworkToChainId.get("avalanche")?.toString():
       return createClientAvalanche();
     case EvmNetworkToChainId.get("iotex")?.toString():
-        return createClientIotex();
+      return createClientIotex();
     case EvmNetworkToChainId.get("bsc")?.toString():
       return createClientBsc();
     case EvmNetworkToChainId.get("polygon")?.toString():
       return createClientPolygon();
     case EvmNetworkToChainId.get("sei")?.toString():
       return createClientSei();
+    case EvmNetworkToChainId.get("xlayer")?.toString():
+      return createClientXLayer();
     default:
       throw new Error(`Unsupported network ID: ${networkId}`);
   }
@@ -74,13 +99,13 @@ export function getPublicClient(
  * @returns A public client instance connected to Base
  */
 export function createClientBase(): ConnectedClient<
-  Transport,
-  typeof base,
-  undefined
+    Transport,
+    typeof base,
+    undefined
 > {
   return createPublicClient({
     chain: base,
-    transport: http(),
+    transport: http("https://base.drpc.org"),
   }).extend(publicActions);
 }
 
@@ -90,9 +115,9 @@ export function createClientBase(): ConnectedClient<
  * @returns A public client instance connected to Base Sepolia
  */
 export function createClientSepolia(): ConnectedClient<
-  Transport,
-  typeof baseSepolia,
-  undefined
+    Transport,
+    typeof baseSepolia,
+    undefined
 > {
   return createPublicClient({
     chain: baseSepolia,
@@ -106,9 +131,9 @@ export function createClientSepolia(): ConnectedClient<
  * @returns A public client instance connected to Avalanche
  */
 export function createClientAvalanche(): ConnectedClient<
-  Transport,
-  typeof avalanche,
-  undefined
+    Transport,
+    typeof avalanche,
+    undefined
 > {
   return createPublicClient({
     chain: avalanche,
@@ -122,9 +147,9 @@ export function createClientAvalanche(): ConnectedClient<
  * @returns A public client instance connected to Avalanche Fuji
  */
 export function createClientAvalancheFuji(): ConnectedClient<
-  Transport,
-  typeof avalancheFuji,
-  undefined
+    Transport,
+    typeof avalancheFuji,
+    undefined
 > {
   return createPublicClient({
     chain: avalancheFuji,
@@ -138,9 +163,9 @@ export function createClientAvalancheFuji(): ConnectedClient<
  * @returns A public client instance connected to Iotex
  */
 export function createClientIotex(): ConnectedClient<
-  Transport,
-  typeof iotex,
-  undefined
+    Transport,
+    typeof iotex,
+    undefined
 > {
   return createPublicClient({
     chain: iotex,
@@ -154,9 +179,9 @@ export function createClientIotex(): ConnectedClient<
  * @returns A public client instance connected to BSC
  */
 export function createClientBsc(): ConnectedClient<
-  Transport,
-  typeof bsc,
-  undefined
+    Transport,
+    typeof bsc,
+    undefined
 > {
   return createPublicClient({
     chain: bsc,
@@ -170,9 +195,9 @@ export function createClientBsc(): ConnectedClient<
  * @returns A public client instance connected to Polygon
  */
 export function createClientPolygon(): ConnectedClient<
-  Transport,
-  typeof polygon,
-  undefined
+    Transport,
+    typeof polygon,
+    undefined
 > {
   return createPublicClient({
     chain: polygon,
@@ -186,12 +211,28 @@ export function createClientPolygon(): ConnectedClient<
  * @returns A public client instance connected to Sei
  */
 export function createClientSei(): ConnectedClient<
-  Transport,
-  typeof sei,
-  undefined
+    Transport,
+    typeof sei,
+    undefined
 > {
   return createPublicClient({
     chain: sei,
+    transport: http(),
+  }).extend(publicActions);
+}
+
+/**
+ * Creates a public client configured for the X Layer
+ *
+ * @returns A public client instance connected to X Layer
+ */
+export function createClientXLayer(): ConnectedClient<
+    Transport,
+    typeof xlayer,
+    undefined
+> {
+  return createPublicClient({
+    chain: xlayer,
     transport: http(),
   }).extend(publicActions);
 }
@@ -204,7 +245,7 @@ export function createClientSei(): ConnectedClient<
  * @returns A wallet client instance connected to Base with the provided private key
  */
 export function createSignerBase(
-  privateKey: Hex
+    privateKey: Hex
 ): SignerWallet<typeof base> {
   return createWalletClient({
     chain: base,
@@ -220,7 +261,7 @@ export function createSignerBase(
  * @returns A wallet client instance connected to Base with the provided private key
  */
 export function createSignerSepolia(
-  privateKey: Hex
+    privateKey: Hex
 ): SignerWallet<typeof baseSepolia> {
   return createWalletClient({
     chain: baseSepolia,
@@ -236,7 +277,7 @@ export function createSignerSepolia(
  * @returns A wallet client instance connected to Avalanche with the provided private key
  */
 export function createSignerAvalanche(
-  privateKey: Hex
+    privateKey: Hex
 ): SignerWallet<typeof avalanche> {
   return createWalletClient({
     chain: avalanche,
@@ -252,7 +293,7 @@ export function createSignerAvalanche(
  * @returns A wallet client instance connected to Avalanche Fuji with the provided private key
  */
 export function createSignerAvalancheFuji(
-  privateKey: Hex
+    privateKey: Hex
 ): SignerWallet<typeof avalancheFuji> {
   return createWalletClient({
     chain: avalancheFuji,
@@ -268,7 +309,7 @@ export function createSignerAvalancheFuji(
  * @returns A wallet client instance connected to Iotex with the provided private key
  */
 export function createSignerIotex(
-  privateKey: Hex
+    privateKey: Hex
 ): SignerWallet<typeof iotex> {
   return createWalletClient({
     chain: iotex,
@@ -292,17 +333,33 @@ export function createSignerBsc(privateKey: Hex): SignerWallet<typeof bsc> {
 }
 
 /**
+ * Creates a wallet client configured for the X Layer with a private key
+ *
+ * @param privateKey - The private key to use for signing transactions
+ * @returns A wallet client instance connected to X Layer with the provided private key
+ */
+export function createSignerXLayer(
+    privateKey: Hex
+): SignerWallet<typeof xlayer> {
+  return createWalletClient({
+    chain: xlayer,
+    transport: http(),
+    account: privateKeyToAccount(privateKey),
+  }).extend(publicActions);
+}
+
+/**
  * Checks if a wallet is a signer wallet
  *
  * @param wallet - The wallet to check
  * @returns True if the wallet is a signer wallet, false otherwise
  */
 export function isSignerWallet<
-  TChain extends Chain = Chain,
-  TTransport extends Transport = Transport,
-  TAccount extends Account = Account
+    TChain extends Chain = Chain,
+    TTransport extends Transport = Transport,
+    TAccount extends Account = Account
 >(
-  wallet: SignerWallet<TChain, TTransport, TAccount> | Account
+    wallet: SignerWallet<TChain, TTransport, TAccount> | Account
 ): wallet is SignerWallet<TChain, TTransport, TAccount> {
   return "chain" in wallet && "transport" in wallet;
 }
