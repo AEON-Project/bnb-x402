@@ -37,41 +37,49 @@ The example demonstrates how to:
 ## Example Code
 
 ```typescript
+import axios from "axios";
 import { config } from "dotenv";
-import { createWalletClient, http, publicActions } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { withPaymentInterceptor } from "x402-clients";
-import axios from "clients";
-import { base } from "viem/chains";
+import { Chain, createWalletClient, http, publicActions, type Hex } from "viem";
+import { withPaymentInterceptor, decodeXPaymentResponse } from "@aeon-ai-pay/x402-axios";
+import { evm } from "@aeon-ai-pay/x402/types";
 
 config();
 
-const { RESOURCE_SERVER_URL, PRIVATE_KEY, ENDPOINT_PATH } = process.env;
+const evmPrivateKey = process.env.EVM_PRIVATE_KEY as Hex;
+const baseURL = process.env.RESOURCE_SERVER_URL as string; // e.g. http://localhost:3000
+const endpointPath = process.env.ENDPOINT_PATH as string; // e.g. /image
 
-// Create wallet client
-const account = privateKeyToAccount(PRIVATE_KEY as "0x${string}");
-const client = createWalletClient({
-  account,
-  transport: http(),
-  chain: base as Chain,
-}).extend(publicActions);
+if (!baseURL || !evmPrivateKey || !endpointPath) {
+    console.error("Missing required environment variables");
+    process.exit(1);
+}
 
-// Create Axios instance with payment handling
+// EVM client
+const evmClient = evm.createSignerBase(evmPrivateKey);
+/*const evmClient = evm.createSignerBsc(evmPrivateKey);
+const evmClient = evm.createSignerXLayer(evmPrivateKey);*/
+
+
+// Create the API client with payment interceptor
 const api = withPaymentInterceptor(
-  axios.create({
-    baseURL: RESOURCE_SERVER_URL,
-  }),
-  client
+    axios.create({
+        baseURL,
+    }),
+    {
+        evmClient,
+    },
 );
 
-// Make request to paid endpoint
 api
-  .get(ENDPOINT_PATH)
-  .then(response => {
-    console.log(response.headers);
-    console.log(response.data);
-  })
-  .catch(error => {
-    console.error(error.response?.data?.error);
-  });
+    .get(endpointPath)
+    .then(response => {
+        console.log(response.data);
+
+        const paymentResponse = decodeXPaymentResponse(response.headers["x-payment-response"]);
+        console.log(paymentResponse);
+    })
+    .catch(error => {
+        console.error("example axios error", error);
+    });
+
 ```

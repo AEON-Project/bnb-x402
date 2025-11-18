@@ -71,14 +71,50 @@ app.use(
             scheme: "exact",
             namespace: "evm",
             tokenAddress: "0x55d398326f99059ff775485246999027b3197955", // USDT on BSC
+            amountRequired: 0.001,
+            amountRequiredFormat: "humanReadable",
+            networkId: "56",
+            payToAddress: evmAddress,
+            description: "Weather data access with USDT",
+            tokenDecimals: 18,
+            tokenSymbol: "USDT",
+          },
+          {
+            scheme: "exact",
+            namespace: "evm",
+            tokenAddress: "0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E", // TESTU on BSC
             amountRequired: 0.01,
             amountRequiredFormat: "humanReadable",
             networkId: "56",
-            payToAddress: evmAddress, // Example Evm address
-            description: "Premium content access with USDT on BSC",
+            payToAddress: evmAddress,
+            description: "Weather data access with TESTU",
             tokenDecimals: 18,
+            tokenSymbol: "TESTU",
+          },
+          {
+            scheme: "exact",
+            namespace: "evm",
+            tokenAddress: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913", // USDC on Base
+            amountRequired: 0.001,
+            amountRequiredFormat: "humanReadable",
+            networkId: "8453",
+            payToAddress: evmAddress,
+            description: "Weather data access with USDC on Base",
+            tokenDecimals: 6,
+            tokenSymbol: "USDC",
+          },
+          {
+            scheme: "exact",
+            namespace: "evm",
+            tokenAddress: "0x779ded0c9e1022225f8e0630b35a9b54be713736", // USDT on Laye
+            amountRequired: 0.01,
+            amountRequiredFormat: "humanReadable",
+            networkId: "196",
+            payToAddress: evmAddress,
+            description: "Premium content access with USDT on X Laye",
+            tokenDecimals: 6,
             tokenSymbol: "USDT",
-          }
+          },
         ],
       },
     },

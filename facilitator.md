@@ -392,9 +392,14 @@ When payment verification fails, the response includes an `invalidReason`:
   const currentTime = Math.floor(Date.now() / 1000);
   const validAfter = BigInt(currentTime - 60); // 1 minute before current time for safety
   const validBefore = BigInt(currentTime + (estimatedProcessingTime ?? 600)); // 10 minutes from now
-  
-  // const verifyingContract = "0x555e3311a9893c9B17444C1Ff0d88192a57Ef13e";
-  const {domain} = await client.getEip712Domain({
+/*If the contract does not include the getEip712Domain function, the Domain needs to be customized, such as base usdc
+  domain = {
+    name: 'USD Coin',
+    version: '2',
+    chainId: BigInt(parseInt(networkId)),
+    verifyingContract: contractAddress,
+   };*/
+const {domain} = await client.getEip712Domain({
   address: tokenAddress?.toLowerCase() as Hex,
   });
   const data = {
