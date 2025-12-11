@@ -83,19 +83,6 @@ The request body is in JSON format, containing the following fields:
     "type": "payload"
   }  
   ```  
-- **verifyheaders**: 
-   ```json {
-    "x-powered-by": "Express",
-    "content-type": "application/json; charset=utf-8",
-    "content-length": "33",
-    "etag": "W/21-VdI4kxX6pkOFCWYq2jYO1Tz2sD4",
-    "date": "Fri, 14 Nov 2025 08:45:50 GMT",
-    "connection": "keep-alive",
-    "keep-alive": "timeout=5"
-    }
-  ``` 
-  
-
 
 #### 3.3.2 Failure Response (Verification Failed)
 - **Status Code**: `401`.
@@ -105,19 +92,6 @@ The request body is in JSON format, containing the following fields:
   "error": "Invalid API key - external validation failed"
   }
   ```  
-- **Error Response Headers**:
-  ```json 
-  {
-    "x-powered-by": "Express",
-    "content-type": "application/json; charset=utf-8",
-    "content-length": "56",
-    "etag": "W/\"38-SCeDq9JH0RX2yP66KV0Q9H3RCMk\"",
-    "date": "Fri, 14 Nov 2025 10:36:00 GMT",
-    "connection": "keep-alive",
-    "keep-alive": "timeout=5"
-  }
-  ```
-
 
 ### 3.4 Request Example (cURL)
 ```bash  
@@ -190,19 +164,6 @@ The request body is in JSON format, containing the `verifyId` returned by the `v
   "payer": "0xA0a35e76e4476Bd62fe452899af7aEa6D1B20aB7"
   }  
   ```
-- **settleheaders**: 
-  ```json
-   {
-   "x-powered-by": "Express",
-    "content-type": "application/json; charset=utf-8",
-    "content-length": "170",
-    "etag": "W/aa-JJ1fd5obnqX8fUrlDmWVzQK23pk",
-    "date": "Fri, 14 Nov 2025 08:45:53 GMT",
-    "connection": "keep-alive",
-    "keep-alive": "timeout=5"
-    }
-    ```
-
 
 #### 4.3.2 Failure Response (Settlement Failed)
 - **Status Code**: `401`.
@@ -211,20 +172,6 @@ The request body is in JSON format, containing the `verifyId` returned by the `v
   {
   "error": "Invalid API key - external validation failed"
   }
-  ```  
-- **Error Response Headers**:
-  ```json 
-  {
-    "x-powered-by": "Express",
-    "content-type": "application/json; charset=utf-8",
-    "content-length": "56",
-    "etag": "W/38-SCeDq9JH0RX2yP66KV0Q9H3RCMk\"",
-    "date": "Fri, 14 Nov 2025 10:36:00 GMT",
-    "connection": "keep-alive",
-    "keep-alive": "timeout=5"
-  }
-  ```
-
 
 ### 4.4 Request Example (cURL)
 ```bash  
