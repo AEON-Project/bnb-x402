@@ -142,13 +142,29 @@ Same as the `verify` API:
 
 
 #### 4.2.4 Request Body
-The request body is in JSON format, containing the `verifyId` returned by the `verify` API and payment transaction information:
+The request body is in JSON format, containing the following fields:
 
-| Field Name         | Type   | Required | Description                                                                 | Example Value                                      |  
-|--------------------|--------|----------|-----------------------------------------------------------------------------|-----------------------------------------------------|  
-| verifyId           | string | Yes      | Unique verification ID returned by the `verify` API (used to associate verification records) | `verify_123456`                                     |  
-| transactionHash    | string | Yes      | Blockchain payment transaction hash (must match the payment parameters in `verify`) | `0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef` |  
-| timestamp          | number | Yes      | Timestamp of transaction completion (in milliseconds)                        | `1718236800000`                                     |  
+| First-level Field     | Type   | Required | Description                                                                 |  
+|-----------------------|--------|----------|-----------------------------------------------------------------------------|  
+| payload               | string | Yes      | Encoded payment-related payload (Base64-encoded JSON string containing core information such as signatures) |  
+| paymentRequirements   | object | Yes      | Detailed parameters of payment requirements                                 |  
+
+
+**Description of `paymentRequirements` fields**:
+
+| Second-level Field     | Type   | Required | Description                                                                 | Example Value                                      |  
+|------------------------|--------|----------|-----------------------------------------------------------------------------|-----------------------------------------------------|  
+| scheme                 | string | Yes      | Payment scheme type, fixed as `exact`                                       | `exact`                                             |  
+| namespace              | string | Yes      | Blockchain namespace (use `evm` for EVM-compatible chains)                   | `evm`                                               |  
+| tokenAddress           | string | Yes      | Contract address of the payment token (EVM chain format)                    | `0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E`         |  
+| amountRequired         | number | Yes      | Required payment amount (human-readable format)                             | `0.01`                                              |  
+| amountRequiredFormat   | string | Yes      | Amount format, fixed as `humanReadable` (non-minimal unit)                   | `humanReadable`                                     |  
+| networkId              | string | Yes      | Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain)          | `56`                                                |  
+| payToAddress           | string | Yes      | Recipient address (EVM chain format)                                        | `0xA0a35e76e4476Bd62fe452899af7aEa6D1B20aB7`         |  
+| description            | string | Yes      | Payment description (e.g., resource access instructions)                    | `Premium content access with TESTU`                 |  
+| tokenDecimals          | number | Yes      | Number of decimal places of the token (usually 18)                           | `18`                                                |  
+| tokenSymbol            | string | Yes      | Token symbol                                                                | `TESTU`                                             |  
+| resource               | string | Yes      | URL of the resource corresponding to the payment (e.g., content access URL) | `http://localhost:4021/premium/content`             | 
 
 
 ### 4.3 Response Information
