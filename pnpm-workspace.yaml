@@ -1,5 +1,0 @@
-packages:
-  - 'clients'
-  - 'servers'
-  - 'typescript/packages/*'
-  - 'typescript/packages/X402/src/paywall-app'

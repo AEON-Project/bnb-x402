@@ -1,0 +1,73 @@
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  // Turbopack currently cannot bundle some Node-only deps that use dynamic require
+  // (e.g. `ethers`, and packages that depend on it). Keep them as server externals.
+  serverExternalPackages: ["ethers", "ws", "megafuel-js-sdk"],
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
+  async headers() {
+    return [
+      {
+        source: "/api/stats",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "s-maxage=300, stale-while-revalidate=600",
+          },
+        ],
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/build",
+        destination: "/build-with-us",
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: "/protocol",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/foundation",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/build",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/build-with-us",
+        destination: "/",
+        permanent: false,
+      },
+    ];
+  },
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    },
+  },
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ["@svgr/webpack"],
+    });
+
+    return config;
+  },
+};
+
+export default nextConfig;
