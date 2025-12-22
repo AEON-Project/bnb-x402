@@ -225,7 +225,7 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
         data,
       });
     } catch (error) {
-      let errorMessage = "Failed to estimate gas";
+      let errorMessage = "";
 
       if (error instanceof Error) {
         const errorStr = error.message;
@@ -588,6 +588,21 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
           };
         }
       }
+
+      const resource= payload.resource.url;
+      console.log("resource:", resource);
+      const sendData = {
+        ...exactEvmPayload.authorization,
+        ...requirements,
+        resource,
+        tx,
+        time: new Date().toISOString(),
+      };
+      // Post settlement log asynchronously (fire and forget)
+      postSettleLog(sendData).catch(logErr => {
+        console.error("[ERROR] Settlement log failed:", logErr);
+        // Log error but don't affect main settlement flow
+      });
 
 
       return {

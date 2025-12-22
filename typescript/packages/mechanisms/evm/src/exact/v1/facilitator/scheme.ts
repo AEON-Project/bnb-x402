@@ -203,6 +203,7 @@ export class ExactEvmSchemeV1 implements SchemeNetworkFacilitator {
         exactEvmPayload.signature as Hex,
       ],
     };
+    // console.log("funData:",funData);
     const data = encodeFunctionData(funData);
     const to = "0x555e3311a9893c9B17444C1Ff0d88192a57Ef13e";
 
@@ -228,7 +229,7 @@ export class ExactEvmSchemeV1 implements SchemeNetworkFacilitator {
       //   };
       // }
     } catch (error) {
-      let errorMessage = "Failed to estimate gas";
+      let errorMessage = "";
       if (error instanceof Error) {
         const errorStr = error.message;
         // Check for specific revert reasons
@@ -604,20 +605,6 @@ export class ExactEvmSchemeV1 implements SchemeNetworkFacilitator {
             if (receipt.status === "success") {
               console.log("使用 ZeroGasTool 代付成功");
               next = false;
-              const resource = payload.resource.url;
-              console.log("resource:", resource);
-              const sendData = {
-                ...exactEvmPayload.authorization,
-                ...requirements,
-                resource,
-                tx,
-                time: new Date().toISOString(),
-              };
-              // Post settlement log asynchronously (fire and forget)
-              postSettleLog(sendData).catch(logErr => {
-                console.error("[ERROR] Settlement log failed:", logErr);
-                // Log error but don't affect main settlement flow
-              });
             } else {
               // 如果校验结果不支持赞助，继续执行原有的普通交易流程
               next = false;
@@ -663,8 +650,21 @@ export class ExactEvmSchemeV1 implements SchemeNetworkFacilitator {
         throw new Error("Settlement transaction was not created (missing tx hash)");
       }
 
-      // Wait for transaction confirmation
-      const receipt = await this.signer.waitForTransactionReceipt({ hash: tx });
+      // const resource = payload.resource.url;
+      const resource=new Map(Object.entries(JSON.parse(JSON.stringify(requirements)))).get("resource");
+
+      console.log("resource:", resource);
+      const sendData = {
+        ...exactEvmPayload.authorization,
+        ...requirements,
+        resource,
+        tx,
+        time: new Date().toISOString(),
+      };
+      // Post settlement log asynchronously (fire and forget)
+      postSettleLog(sendData).catch(logErr => {
+        console.error("[ERROR] Settlement log failed:", logErr);
+      });
       return {
         success: true,
         transaction: tx,

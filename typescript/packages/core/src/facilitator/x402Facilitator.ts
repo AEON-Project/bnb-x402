@@ -304,6 +304,9 @@ export class x402Facilitator {
       let schemeNetworkFacilitator: SchemeNetworkFacilitator | undefined;
       for (const schemeData of schemeDataArray) {
         if (schemeData.facilitator.scheme === paymentRequirements.scheme) {
+          if (paymentRequirements.network == null) {
+            paymentRequirements.network = `${paymentRequirements.networkId}` as Network;
+          }
           // Check if network matches
           if (schemeData.networks.has(paymentRequirements.network)) {
             schemeNetworkFacilitator = schemeData.facilitator;
