@@ -41,7 +41,7 @@ The BNB x402 protocol enables HTTP-native blockchain payments for API access. Th
      1. Pre-authorized credit limit and payment amount.
      2. Utilize payload information and employ a contract to generate a signature.
 5. **Verification**: The server uses the 'PAYMENT-SIGNATURE' and 'PAYMENT-REQUIRED' interfaces to communicate with the facilitator `/verify` interface.
-6. **Get/verify result**: Get the facilitator `/verify` interface response
+6. **Get/verify result**: Get the facilitator `/verify` interface response.
 7. **Settlement**: If verify is OK, Client send request  with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED` to facilitator for `settle`.
 8. **Submit tx**: If settle is complete,Submit transaction hash.
 9. **Tx confirmed**: Return the confirmed result of tx.
