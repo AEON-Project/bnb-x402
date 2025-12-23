@@ -351,7 +351,6 @@ For EVM-compatible networks, payment requirements specify:
 {
     "scheme": "exact",
         "network": "eip155:56",
-        "networkId": "56",
         "amount": "10000",
         "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
         "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
