@@ -183,7 +183,6 @@ curl --location 'http://localhost:4021/weather'
 ```json
 "payment-required":"
 eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cDovL2xvY2FsaG9zdDo0MDIxL3dlYXRoZXIiLCJkZXNjcmlwdGlvbiI6IldlYXRoZXIgZGF0YSIsIm1pbWVUeXBlIjoiYXBwbGljYXRpb24vanNvbiJ9LCJhY2NlcHRzIjpbeyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJlaXAxNTU6MTk2IiwibmV0d29ya0lkIjoiMTk2IiwiYW1vdW50IjoiMTAwMDAiLCJhc3NldCI6IjB4NzRiN2YxNjMzN2I4OTcyMDI3ZjYxOTZhMTdhNjMxYWM2ZGUyNmQyMiIsInBheVRvIjoiMHgyRUM4QTNEMjZiNzIwYzdhMkIxNmY1ODJkODgzRjc5OGJFRUEzNjI4IiwibWF4VGltZW91dFNlY29uZHMiOjMwMCwiZXh0cmEiOnsibmFtZSI6IlVTREMiLCJ2ZXJzaW9uIjoiMiJ9fV19"
-
 ```
 Base64 decoded data
 ```json
@@ -254,6 +253,24 @@ Base64 decoded data
         "version": "2"
       }
     }
+  }
+}
+```
+### Second Response  body
+```json
+{
+  success: true,
+  transaction: '0x685a5b37f8e9affae5787ee7dfeaab20e0b4e2a8c3197020299b1c0163ef0c74',
+  network: 'eip155:8453',
+  payer: '0x34B7FE106891a07528b4F2e5E339C32DA13cF510',
+  requirements: {
+    scheme: 'exact',
+    network: 'eip155:8453',
+    amount: '1000',
+    asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+    payTo: '0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628',
+    maxTimeoutSeconds: 300,
+    extra: { name: 'USD Coin', version: '2' }
   }
 }
 ```
@@ -444,7 +461,7 @@ For EVM-compatible networks, payment requirements specify:
 | asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
 | payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
 | maxTimeoutSeconds  |number|Yes| Payment timeout period (unit: seconds)                              | 300                                        |
-| extra              |object|Yes| Additional supplementary information related to payment             | {"name":"USDT","version":"1"}              |
+| extra              |object|Yes| Additional supplementary information related to payment             | {"name":"USDT","version":"2"}              |
 
 ---
 
