@@ -301,7 +301,6 @@ Base64 decoded data
     {
       "scheme": "exact",
       "network": "ip155:196",
-      "networkId": "196",
       "amount": "10000",
       "asset": "0x74b7f16337b8972027f6196a17a631ac6de26d22",
       "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
@@ -346,7 +345,6 @@ Base64 decoded data
     "accepted": {
       "scheme": "exact",
       "network": "eip155:8453",
-      "networkId": "8453",
       "amount": "1000",
       "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
@@ -619,7 +617,7 @@ When payment verification fails, the response includes an `invalidReason`:
 **Cause:** Signature doesn't match payment requirements
 
 **Solution:**
-- Verify wallet client chain matches `networkId`
+- Verify wallet client chain matches `network`
 - Check `validAfter` and `validBefore` timestamps
 - Ensure `from`, `to`, and `value` match requirements
 
