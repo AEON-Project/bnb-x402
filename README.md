@@ -59,6 +59,7 @@ The BNB x402 protocol enables HTTP-native blockchain payments for API access. Th
 ### Installation
 
 ```bash
+cd typescript
 pnpm install 
 pnpm build  
 ```
@@ -66,7 +67,7 @@ pnpm build
 #### Server Side
 
 ```bash
-cd servers/
+cd examples/typescript/servers/
 pnpm dev
 cd ..  
 ```
@@ -74,80 +75,190 @@ cd ..
 #### Client Side
 
 ```bash
-cd clients/
+cd examples/typescript/clients/
 pnpm  dev
 ```
 
 ### Quick Start - Server
 
 ```typescript
-import {serve} from "@hono/node-server";
-import {Hono} from "hono";
-import {paymentMiddleware} from "@aeon-ai-pay/x402-hono";
-import {createRouteConfigFromPrice} from "@aeon-ai-pay/x402/shared";
+import { config } from "dotenv";
+import { paymentMiddleware, x402ResourceServer } from "@x402/hono";
+import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { HTTPFacilitatorClient } from "@x402/core/server";
+import { Hono } from "hono";
+import { serve } from "@hono/node-server";
+config();
+
+const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
+const svmAddress = process.env.SVM_ADDRESS;
+const apiKey = process.env.API_KEY as string;
+if (!evmAddress || !svmAddress) {
+  console.error("Missing required environment variables");
+  process.exit(1);
+}
+
+const facilitatorUrl = process.env.FACILITATOR_URL;
+if (!facilitatorUrl) {
+  console.error("❌ FACILITATOR_URL environment variable is required");
+  process.exit(1);
+}
+
+// 创建 facilitator client，如果提供了 API Key，则配置认证头
+const facilitatorClient = new HTTPFacilitatorClient({
+  url: facilitatorUrl,
+  createAuthHeaders: apiKey
+    ? async () => {
+        return {
+          verify: {
+            Authorization: `Bearer ${apiKey}`,
+          },
+          settle: {
+            Authorization: `Bearer ${apiKey}`,
+          },
+          supported: {
+            Authorization: `Bearer ${apiKey}`,
+          },
+        };
+      }
+    : undefined,
+});
 
 const app = new Hono();
-const facilitatorUrl = "https://facilitator.aeon.xyz";
-const network = "bsc";
-const evmAddress = "0xYourAddress";
 
-// Configure payment requirements
-const routeConfig = {
-  "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress),
-  "/premium/*": {
-    paymentRequirements: [{
-      scheme: "exact",
-      namespace: "evm",
-      tokenAddress: "0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E",
-      amountRequired: 0.01,
-      amountRequiredFormat: "humanReadable",
-      networkId: "56",
-      payToAddress: evmAddress,
-      description: "Premium content access with TESTU",
-      tokenDecimals: 18,
-      tokenSymbol: "TESTU",
-    },]
-  }
-};
+app.use(
+  paymentMiddleware(
+    {
+      "GET /weather": {
+        accepts: [
+          {
+            scheme: "exact",
+            price: "$0.001",
+            network: "eip155:196",
+            payTo: evmAddress,
+          },
+          // {
+          //   scheme: "exact",
+          //   price: "$0.001",
+          //   network: "eip155:56",
+          //   payTo: evmAddress,
+          // },
+          // {
+          //   scheme: "exact",
+          //   price: "$0.001",
+          //   network: "eip155:8453",
+          //   payTo: evmAddress,
+          // }
+        ],
+        description: "Weather data",
+        mimeType: "application/json",
+      },
+    },
+    new x402ResourceServer(facilitatorClient)
+      .register("eip155:196", new ExactEvmScheme())
+        .register("eip155:56", new ExactEvmScheme())
+        .register("eip155:8453", new ExactEvmScheme())
+  ),
+);
 
-// Apply payment middleware
-app.use("*", paymentMiddleware(routeConfig, {url: facilitatorUrl}));
-
-// Protected endpoints
-app.get("/weather", (c) => {
-  return c.json({report: {weather: "sunny", temperature: 70}});
+app.get("/weather", c => {
+  return c.json({
+    report: {
+      weather: "sunny",
+      temperature: 70,
+    },
+  });
 });
 
-app.get("/premium/content", (c) => {
-  return c.json({content: "Premium content"});
+serve({
+  fetch: app.fetch,
+  port: 4021,
 });
 
-serve({fetch: app.fetch, port: 4021});
+console.log(`Server listening at http://localhost:4021`);
 ```
 
 ### Quick Start - Client
 
 ```typescript
-import axios from "axios";
-import { withPaymentInterceptor } from "@aeon-ai-pay/x402-axios";
-import { createWalletClient, http } from "viem";
+import { config } from "dotenv";
+import { x402Client, wrapFetchWithPayment, x402HTTPClient } from "@x402/fetch";
+import { registerExactEvmScheme } from "@x402/evm/exact/client";
+import { registerExactSvmScheme } from "@x402/svm/exact/client";
+import { toClientEvmSigner } from "@x402/evm";
 import { privateKeyToAccount } from "viem/accounts";
-import { bsc } from "viem/chains";
+import { createPublicClient, createWalletClient, http, publicActions } from "viem";
+import { bsc, xLayer, base } from "viem/chains";
 
-// Create wallet client
-const account = privateKeyToAccount("0xYourPrivateKey");
-const walletClient = createWalletClient({
-  account,
-  chain: bsc,
-  transport: http()
+config();
+
+const evmPrivateKey = process.env.EVM_PRIVATE_KEY as `0x${string}`;
+const svmPrivateKey = process.env.SVM_PRIVATE_KEY as string;
+const baseURL = process.env.RESOURCE_SERVER_URL || "http://localhost:4021";
+const endpointPath = process.env.ENDPOINT_PATH || "/weather";
+const url = `${baseURL}${endpointPath}`;
+
+/**
+ * Example demonstrating how to use @x402/fetch to make requests to x402-protected endpoints.
+ *
+ * This uses the helper registration functions from @x402/evm and @x402/svm to register
+ * all supported networks for both v1 and v2 protocols.
+ *
+ * Required environment variables:
+ * - EVM_PRIVATE_KEY: The private key of the EVM signer
+ * - SVM_PRIVATE_KEY: The private key of the SVM signer
+ */
+async function main(): Promise<void> {
+  const evmAccount = privateKeyToAccount(evmPrivateKey);
+
+  const walletClient = createWalletClient({
+    account: evmAccount,
+    chain: xLayer,
+    transport: http(),
+  }).extend(publicActions);
+
+  const evmSigner = toClientEvmSigner({
+    address: evmAccount.address,
+    signTypedData: message => evmAccount.signTypedData(message as never),
+    readContract: args =>
+      walletClient.readContract({
+        ...args,
+        args: args.args || [],
+      } as never),
+    sendTransaction: args =>
+      walletClient.sendTransaction({
+        to: args.to,
+        data: args.data,
+      } as never),
+    waitForTransactionReceipt: (args: { hash: `0x${string}` }) =>
+      walletClient.waitForTransactionReceipt(args),
+  });
+
+  const client = new x402Client();
+  registerExactEvmScheme(client, { signer: evmSigner });
+
+  const fetchWithPayment = wrapFetchWithPayment(fetch, client);
+
+  console.log(`Making request to: ${url}\n`);
+  const response = await fetchWithPayment(url, { method: "GET" });
+  const body = await response.json();
+  console.log("Response body:", body);
+
+  if (response.ok) {
+    const paymentResponse = new x402HTTPClient(client).getPaymentSettleResponse(name =>
+      response.headers.get(name),
+    );
+    console.log("\nPayment response:", paymentResponse);
+  } else {
+    console.log(`\nNo payment settled (response status: ${response.status})`);
+  }
+}
+
+main().catch(error => {
+  console.error(error?.response?.data?.error ?? error);
+  process.exit(1);
 });
 
-// Create HTTP client with payment interceptor
-const client = withPaymentInterceptor(axios.create(), walletClient);
-
-// Make requests - payment handled automatically
-const response = await client.get("http://localhost:4021/weather");
-console.log(response.data);
 ```
 
 ---
