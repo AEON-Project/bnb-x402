@@ -12,12 +12,12 @@ Last Updated: December 2025
 2. [Getting Started](#getting-started)
 3. [Authentication & Payment Flow](#authentication--payment-flow)
 4. [Server API Reference](#server-api-reference)
-5. [Client SDK Reference](#client-sdk-reference)
-6. [Payment Requirements](#payment-requirements)
-7. [HTTP Headers](#http-headers)
-8. [Error Handling](#error-handling)
-9. [Supported Networks](#supported-networks)
-10. [Code Examples](#code-examples)
+5. [Payment Requirements](#payment-requirements)
+6. [HTTP Headers](#http-headers)
+7. [Error Handling](#error-handling)
+8. [Supported Networks](#supported-networks)
+9. [Code Examples](#code-examples)
+
 
 ---
 
