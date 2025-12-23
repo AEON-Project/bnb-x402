@@ -34,16 +34,16 @@ The BNB x402 protocol enables HTTP-native blockchain payments for API access. Th
 
 ### Architecture
 
-![x402 Protocol Flow](./static/x402-protocol-flow.png)
+![x402 Protocol Flow](./static/flow.png)
 
 **Flow Description:**
-1. **[1]** Client Application makes GET request to /api
-2. **[2]** Server responds with 402 Payment Required and returns payment requirements
-3. **[3]** The Client SDK uses the wallet to sign payments, and this process includes both pre-authorization and signature.
-4. **[4]** Client retries request with X-PAYMENT header
-5. **[5-6]** Server sends payment to Facilitator for verification
-6. **[7-11]** Server processes request and settles payment
-7. **[12]** Server returns 200 OK with content to Client Application
+1.  Client Application makes GET request to /api
+2.  Server responds with 402 Payment Required and returns payment requirements
+3.  The Client SDK uses the wallet to sign payments, and this process includes both pre-authorization and signature.
+4.  Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
+5.  Server sends payment to Facilitator for verification
+6.  Server processes request and settles payment
+7.  Server returns 200 OK with content to Client Application
 
    
 ---
@@ -187,11 +187,12 @@ During pre-authorization, users only need to sign the EIP-3009 authorization onc
 2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
 3. **Payment Selection**: Client SDK selects appropriate payment method
 4. **Signature creation and create payload**: The step of pre-authorization involves directly invoking the contract to sign using the payload information.
-5. **Retry with Payment**: Client retries request with `X-PAYMENT` header
-6. **Verification**: Server sends payment to facilitator for verification
+5. **Retry with Payment**: Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
+6. **Verification**: Server sends paymentPayload and paymentRequirements to facilitator for verification
 7. **Content Delivery**: Server processes request and returns content
-8. **Settlement**: Server settles payment on-chain via facilitator
-9. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` header
+8. **Settlement**: Server settles paymentPayload and paymentRequirements on-chain via facilitator
+9. **Tx confirmed**: Submit transaction hash and remove transaction results
+10. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` body
   
 
 #### 2.ERC-20 Authorization 
@@ -217,14 +218,15 @@ Pre-authorized payment signature that the facilitator can execute.
 4. **Signature creation and create payload**: This pre-authorization process consists of two steps
      1. Pre-authorized credit limit and payment amount;
      2. Utilize payload information and employ a contract to generate a signature.
-5. **Retry with Payment**: Client retries request with `X-PAYMENT` header
-6. **Verification**: Server sends payment to facilitator for verification
+5. **Retry with Payment**: Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
+6. **Verification**: Server sends paymentPayload and paymentRequirements to facilitator for verification
 7. **Content Delivery**: Server processes request and returns content
-8. **Settlement**: Server settles payment on-chain via facilitator
-9. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` header
+8. **Settlement**: Server settles paymentPayload and paymentRequirements on-chain via facilitator
+9. **Tx confirmed**: Submit transaction hash and remove transaction results
+10. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` body
 
 
-> Submit the payment payload and paymentRequirements object, and let the facilitator complete the verification and settlement.
+> Submit the payment paymentPayload and paymentRequirements object, and let the facilitator complete the verification and settlement.
 
 
 ---
@@ -247,175 +249,99 @@ Hono middleware that protects routes with payment requirements.
 **Example:**
 
 ```typescript
-import { paymentMiddleware } from "@aeon-ai-pay/x402-hono";
+import { config } from "dotenv";
+import { paymentMiddleware, x402ResourceServer } from "@x402/hono";
+import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { HTTPFacilitatorClient } from "@x402/core/server";
+import { Hono } from "hono";
+import { serve } from "@hono/node-server";
+config();
 
-const routeConfig = {
-  "/api/data": {
-    paymentRequirements: [/* ... */]
-  }
-};
-
-app.use("*", paymentMiddleware(routeConfig, {
-  url: "https://facilitator.aeon.xyz"
-}));
-```
-
-### Route Configuration
-
-#### `createRouteConfigFromPrice(price, network, payToAddress)`
-
-Helper to create route config from a price string.
-
-**Parameters:**
-
-- `price`: `string` - Price in format `"$0.001"`
-- `network`: `string` - Network identifier (e.g., `"bsc"`, `"base"`, `"XLayer"`)
-- `payToAddress`: `string` - EVM address to receive payment
-
-**Returns:** `RouteConfig`
-
-**Example:**
-
-```typescript
-import { createRouteConfigFromPrice } from "@aeon-ai-pay/x402/shared";
-
-const config = createRouteConfigFromPrice("$0.001", "bsc", "0xYourAddress");
-```
-
-### Types
-
-#### `RoutesConfig`
-
-```typescript
-type RoutesConfig = {
-  [route: string]: RouteConfig;
-};
-```
-
-#### `RouteConfig`
-
-```typescript
-interface RouteConfig {
-  paymentRequirements: PaymentRequirement[];
+const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
+const svmAddress = process.env.SVM_ADDRESS;
+const apiKey = process.env.API_KEY as string;
+if (!evmAddress || !svmAddress) {
+    console.error("Missing required environment variables");
+    process.exit(1);
 }
-```
 
-#### `PaymentRequirement`
-
-```typescript
-interface PaymentRequirement {
-  scheme: "exact";
-  namespace: "evm";
-  tokenAddress: string;
-  amountRequired: number | bigint;
-  amountRequiredFormat: "humanReadable" | "smallestUnit";
-  payToAddress: string;
-  networkId: string;
-  tokenDecimals?: number;
-  tokenSymbol?: string;
-  description?: string;
-  resource?: string;
-  mimeType?: string;
-  estimatedProcessingTime?: number;
-  maxAmountRequired?: number | bigint;
-  requiredDeadlineSeconds?: number;
+const facilitatorUrl = process.env.FACILITATOR_URL;
+if (!facilitatorUrl) {
+    console.error("❌ FACILITATOR_URL environment variable is required");
+    process.exit(1);
 }
-```
 
----
+// 创建 facilitator client，如果提供了 API Key，则配置认证头
+const facilitatorClient = new HTTPFacilitatorClient({
+    url: facilitatorUrl,
+    createAuthHeaders: apiKey
+        ? async () => {
+            return {
+                verify: {
+                    Authorization: `Bearer ${apiKey}`,
+                },
+                settle: {
+                    Authorization: `Bearer ${apiKey}`,
+                },
+                supported: {
+                    Authorization: `Bearer ${apiKey}`,
+                },
+            };
+        }
+        : undefined,
+});
 
-## Client SDK Reference
+const app = new Hono();
 
-### Axios Interceptor
-
-#### `withPaymentInterceptor(axiosInstance, walletClient, options?)`
-
-Adds x402 payment handling to an Axios instance.
-
-**Parameters:**
-
-- `axiosInstance`: `AxiosInstance` - Axios HTTP client
-- `walletClient`: `WalletClient` - Viem wallet client for signing
-- `options?`: `InterceptorOptions` - Optional configuration
-
-**Returns:** `AxiosInstance` with payment interceptor
-
-**Example:**
-
-```typescript
-import axios from "axios";
-import { withPaymentInterceptor } from "@aeon-ai-pay/x402-axios";
-
-const client = withPaymentInterceptor(
-  axios.create({ baseURL: "https://api.example.com" }),
-  walletClient
+app.use(
+    paymentMiddleware(
+        {
+            "GET /weather": {
+                accepts: [
+                    {
+                        scheme: "exact",
+                        price: "$0.001",
+                        network: "eip155:196",
+                        payTo: evmAddress,
+                    },
+                    // {
+                    //   scheme: "exact",
+                    //   price: "$0.001",
+                    //   network: "eip155:56",
+                    //   payTo: evmAddress,
+                    // },
+                    // {
+                    //   scheme: "exact",
+                    //   price: "$0.001",
+                    //   network: "eip155:8453",
+                    //   payTo: evmAddress,
+                    // }
+                ],
+                description: "Weather data",
+                mimeType: "application/json",
+            },
+        },
+        new x402ResourceServer(facilitatorClient)
+            .register("eip155:196", new ExactEvmScheme())
+            .register("eip155:56", new ExactEvmScheme())
+            .register("eip155:8453", new ExactEvmScheme())
+    ),
 );
+
+app.get("/weather", c => {
+    return c.json({
+        report: {
+            weather: "sunny",
+            temperature: 70,
+        },
+    });
+});
+
+serve({
+    fetch: app.fetch,
+    port: 4021,
+});
 ```
-
-### Signing Functions
-#### `signAuthorizationEip3009(client, authParams, paymentRequirements)`
-
-Signs a payment authorization (EIP-3009 style, this process includes both pre-authorization and signature.).
-
-**Parameters:**
-
-- `client`: `WalletClient` - Viem wallet client
-- `authParams`: `AuthorizationParams` - Authorization parameters
-- `paymentRequirements`: `PaymentRequirement` - Payment requirements
-
-**Returns:** `Promise<EvmPaymentPayload>`
-
-**Example:**
-
-```typescript
-import { signAuthorizationEip3009 } from "@aeon-ai-pay/x402/schemes/exact/evm";
-
-const payload = await signAuthorizationEip3009(
-  walletClient,
-  {
-    from: "0xClientAddress",
-    to: "0xServerAddress",
-    value: BigInt("10000000000000000"),
-    validAfter: Math.floor(Date.now() / 1000),
-    validBefore: Math.floor(Date.now() / 1000) + 300
-  },
-  paymentRequirement
-);
-```
-
-
-
-#### `signAuthorization(client, authParams, paymentRequirements)`
-
-Signs a payment authorization (Pre-authorized style).
-
-**Parameters:**
-
-- `client`: `WalletClient` - Viem wallet client
-- `authParams`: `AuthorizationParams` - Authorization parameters
-- `paymentRequirements`: `PaymentRequirement` - Payment requirements
-
-**Returns:** `Promise<EvmPaymentPayload>`
-
-**Example:**
-
-```typescript
-import { signAuthorization } from "@aeon-ai-pay/x402/schemes/exact/evm";
-
-const payload = await signAuthorization(
-  walletClient,
-  {
-    from: "0xClientAddress",
-    to: "0xServerAddress",
-    value: BigInt("10000000000000000"),
-    validAfter: Math.floor(Date.now() / 1000),
-    validBefore: Math.floor(Date.now() / 1000) + 300
-  },
-  paymentRequirement
-);
-```
-
-
 
 ---
 
@@ -427,16 +353,17 @@ For EVM-compatible networks, payment requirements specify:
 
 ```typescript
 {
-  scheme: "exact",
-  namespace: "evm",
-  tokenAddress: "0x55d398326f99059ff775485246999027b3197955", // USDT
-  amountRequired: 0.01,
-  amountRequiredFormat: "humanReadable",
-  payToAddress: "0xRecipientAddress",
-  networkId: "56", // BNB Chain
-  tokenDecimals: 18,
-  tokenSymbol: "USDT",
-  description: "Access to premium content"
+    "scheme": "exact",
+        "network": "eip155:56",
+        "networkId": "56",
+        "amount": "10000",
+        "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+        "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+        "maxTimeoutSeconds": 300,
+        "extra": {
+        "name": "USDT",
+            "version": "1"
+    }
 }
 ```
 
@@ -464,30 +391,15 @@ For EVM-compatible networks, payment requirements specify:
 
 ### Request Headers
 
-#### `X-PAYMENT`
+#### `Authorization`
 
-Contains base64-encoded payment payload.
-
-**Format:**
-```
-X-PAYMENT: base64(JSON.stringify(EvmPaymentPayload))
-```
+API key applied to AEON
 
 **Example:**
 ```
-X-PAYMENT: eyJ0eXBlIjoiYXV0aG9yaXphdGlvbiIsInNpZ25hdHVyZSI6IjB4Li4uIn0=
+Authorization: Bearer 123
 ```
 
-### Response Headers
-
-#### `X-PAYMENT-RESPONSE`
-
-Contains base64-encoded settlement response on successful payment.
-
-**Format:**
-```
-X-PAYMENT-RESPONSE: base64(JSON.stringify(SettleResponse))
-```
 
 **Decoded Structure:**
 ```typescript
@@ -508,6 +420,7 @@ X-PAYMENT-RESPONSE: base64(JSON.stringify(SettleResponse))
 | Code | Meaning | Description |
 |------|---------|-------------|
 | `200` | OK | Request successful, payment processed |
+| `401` | Error            | Missing or invalid Authorization header. Expected: Bearer <API_KEY> |
 | `402` | Payment Required | Payment needed to access resource |
 | `400` | Bad Request | Invalid payment payload |
 | `403` | Forbidden | Payment verification failed |
@@ -547,10 +460,14 @@ When payment verification fails, the response includes an `invalidReason`:
 
 ### EVM Networks
 
-| Network | Chain ID | Native Token | Example Token Address |
-|---------|----------|--------------|----------------------|
-| BNB Chain (BSC) | 56 | BNB | USDT: `0x55d398326f99059ff775485246999027b3197955` |
-| BNB Chain (BSC) | 56 | BNB | TESTU: `0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E` |
+| Network | Chain ID | Example Token Address                               |
+|---------|----------|-----------------------------------------------------|
+| BSC     | 56       | USDT: `0x55d398326f99059ff775485246999027b3197955`  |
+| BSC     | 56       | USDC: `0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d`  |
+| BSC     | 56       | TESTU: `0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E` |
+| BASE    | 8453     | USDC: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`  |
+| X Layer | 196      | USDT: `0x779ded0c9e1022225f8e0630b35a9b54be713736`  |
+
 
 
 ### Token Addresses
@@ -561,177 +478,203 @@ For ERC-20 tokens, use the token contract address.
 
 ## Code Examples
 
-### Example 1: Simple Protected Endpoint
+**Client:**
+```typescript
+import {config} from "dotenv";
+import {wrapFetchWithPayment, x402Client, x402HTTPClient} from "@x402/fetch";
+import {registerExactEvmScheme} from "@x402/evm/exact/client";
+import {toClientEvmSigner} from "@x402/evm";
+import {privateKeyToAccount} from "viem/accounts";
+import {createWalletClient, http, publicActions} from "viem";
+import {xLayer} from "viem/chains";
+
+config();
+
+const evmPrivateKey = process.env.EVM_PRIVATE_KEY as `0x${string}`;
+const svmPrivateKey = process.env.SVM_PRIVATE_KEY as string;
+const baseURL = process.env.RESOURCE_SERVER_URL || "http://localhost:4021";
+const endpointPath = process.env.ENDPOINT_PATH || "/weather";
+const url = `${baseURL}${endpointPath}`;
+
+/**
+ * Example demonstrating how to use @x402/fetch to make requests to x402-protected endpoints.
+ *
+ * This uses the helper registration functions from @x402/evm and @x402/svm to register
+ * all supported networks for both v1 and v2 protocols.
+ *
+ * Required environment variables:
+ * - EVM_PRIVATE_KEY: The private key of the EVM signer
+ */
+async function main(): Promise<void> {
+    const evmAccount = privateKeyToAccount(evmPrivateKey);
+
+    const walletClient = createWalletClient({
+        account: evmAccount,
+        chain: xLayer,
+        transport: http(),
+    }).extend(publicActions);
+
+    const evmSigner = toClientEvmSigner({
+        address: evmAccount.address,
+        signTypedData: message => evmAccount.signTypedData(message as never),
+        readContract: args =>
+            walletClient.readContract({
+                ...args,
+                args: args.args || [],
+            } as never),
+        sendTransaction: args =>
+            walletClient.sendTransaction({
+                to: args.to,
+                data: args.data,
+            } as never),
+        waitForTransactionReceipt: (args: { hash: `0x${string}` }) =>
+            walletClient.waitForTransactionReceipt(args),
+    });
+
+    const client = new x402Client();
+    registerExactEvmScheme(client, { signer: evmSigner });
+
+    const fetchWithPayment = wrapFetchWithPayment(fetch, client);
+
+    console.log(`Making request to: ${url}\n`);
+    const response = await fetchWithPayment(url, { method: "GET" });
+    const body = await response.json();
+    console.log("Response body:", body);
+
+    if (response.ok) {
+        const paymentResponse = new x402HTTPClient(client).getPaymentSettleResponse(name =>
+            response.headers.get(name),
+        );
+        console.log("\nPayment response:", paymentResponse);
+    } else {
+        console.log(`\nNo payment settled (response status: ${response.status})`);
+    }
+}
+
+main().catch(error => {
+    console.error(error?.response?.data?.error ?? error);
+    process.exit(1);
+});
+
+```
 
 **Server:**
 ```typescript
-import { serve } from "@hono/node-server";
-import { Hono } from "hono";
-import { paymentMiddleware } from "@aeon-ai-pay/x402-hono";
-import { createRouteConfigFromPrice } from "@aeon-ai-pay/x402/shared";
+import {config} from "dotenv";
+import {paymentMiddleware, x402ResourceServer} from "@x402/hono";
+import {ExactEvmScheme} from "@x402/evm/exact/server";
+import {HTTPFacilitatorClient} from "@x402/core/server";
+import {Hono} from "hono";
+import {serve} from "@hono/node-server";
+
+config();
+
+const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
+const svmAddress = process.env.SVM_ADDRESS;
+const apiKey = process.env.API_KEY as string;
+if (!evmAddress || !svmAddress) {
+    console.error("Missing required environment variables");
+    process.exit(1);
+}
+
+const facilitatorUrl = process.env.FACILITATOR_URL;
+if (!facilitatorUrl) {
+    console.error("❌ FACILITATOR_URL environment variable is required");
+    process.exit(1);
+}
+
+// 创建 facilitator client，如果提供了 API Key，则配置认证头
+const facilitatorClient = new HTTPFacilitatorClient({
+    url: facilitatorUrl,
+    createAuthHeaders: apiKey
+        ? async () => {
+            return {
+                verify: {
+                    Authorization: `Bearer ${apiKey}`,
+                },
+                settle: {
+                    Authorization: `Bearer ${apiKey}`,
+                },
+                supported: {
+                    Authorization: `Bearer ${apiKey}`,
+                },
+            };
+        }
+        : undefined,
+});
 
 const app = new Hono();
 
-const routeConfig = {
-  "/data": createRouteConfigFromPrice("$0.001", "bsc", "0xYourAddress")
-};
+app.use(
+    paymentMiddleware(
+        {
+            "GET /weather": {
+                accepts: [
+                    {
+                        scheme: "exact",
+                        price: "$0.001",
+                        network: "eip155:196",
+                        payTo: evmAddress,
+                    },
+                    // {
+                    //   scheme: "exact",
+                    //   price: "$0.001",
+                    //   network: "eip155:56",
+                    //   payTo: evmAddress,
+                    // },
+                    // {
+                    //   scheme: "exact",
+                    //   price: "$0.001",
+                    //   network: "eip155:8453",
+                    //   payTo: evmAddress,
+                    // }
+                ],
+                description: "Weather data",
+                mimeType: "application/json",
+            },
+        },
+        new x402ResourceServer(facilitatorClient)
+            .register("eip155:196", new ExactEvmScheme())
+            .register("eip155:56", new ExactEvmScheme())
+            .register("eip155:8453", new ExactEvmScheme())
+    ),
+);
 
-app.use("*", paymentMiddleware(routeConfig, {
-  url: "https://facilitator.aeon.xyz"
-}));
-
-app.get("/data", (c) => c.json({ data: "Protected data" }));
-
-serve({ fetch: app.fetch, port: 4021 });
-```
-
-**Client:**
-```typescript
-import axios from "axios";
-import { withPaymentInterceptor } from "@aeon-ai-pay/x402-axios";
-import { createWalletClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { bsc } from "viem/chains";
-
-const account = privateKeyToAccount(process.env.EVM_PRIVATE_KEY);
-const walletClient = createWalletClient({
-  account,
-  chain: bsc,
-  transport: http()
+app.get("/weather", c => {
+    return c.json({
+        report: {
+            weather: "sunny",
+            temperature: 70,
+        },
+    });
 });
 
-const client = withPaymentInterceptor(axios.create(), walletClient);
-
-async function fetchData() {
-  try {
-    const response = await client.get("http://localhost:4021/data");
-    console.log("Data:", response.data);
-
-    // Check payment response
-    const paymentResponse = response.headers["x-payment-response"];
-    if (paymentResponse) {
-      const decoded = JSON.parse(
-        Buffer.from(paymentResponse, "base64").toString()
-      );
-      console.log("Payment TX:", decoded.transaction);
-    }
-  } catch (error) {
-    console.error("Error:", error.message);
-  }
-}
-
-fetchData();
-```
-
-### Example 2: Multiple Payment Options
-
-**Server:**
-```typescript
-const routeConfig = {
-  "/premium/content": {
-    paymentRequirements: [
-      // Option 1: USDT on BSC
-      {
-        scheme: "exact",
-        namespace: "evm",
-        tokenAddress: "0x55d398326f99059ff775485246999027b3197955",
-        amountRequired: 0.01,
-        amountRequiredFormat: "humanReadable",
-        networkId: "56",
-        payToAddress: evmAddress,
-        tokenDecimals: 18,
-        tokenSymbol: "USDT",
-        description: "Pay with USDT on BNB Chain"
-      },
-      // Option 2: Native BNB
-      {
-        scheme: "exact",
-        namespace: "evm",
-        tokenAddress: "0x0000000000000000000000000000000000000000",
-        amountRequired: 0.001,
-        amountRequiredFormat: "humanReadable",
-        networkId: "56",
-        payToAddress: evmAddress,
-        tokenDecimals: 18,
-        tokenSymbol: "BNB",
-        description: "Pay with BNB"
-      }
-    ]
-  }
-};
-```
-
-### Example 3: Custom Payment Selection
-
-```typescript
-import axios from "axios";
-import { signAuthorization } from "@aeon-ai-pay/x402/schemes/exact/evm";
-
-// Make initial request to get payment requirements
-const initialResponse = await axios.get("http://localhost:4021/api", {
-  validateStatus: (status) => status === 402 || status === 200
+serve({
+    fetch: app.fetch,
+    port: 4021,
 });
 
-if (initialResponse.status === 402) {
-  const paymentRequirements = initialResponse.data.paymentRequirements;
+console.log(`Server listening at http://localhost:4021`);
 
-  // Select preferred payment method
-  const selectedPayment = paymentRequirements.find(
-    req => req.tokenSymbol === "USDT"
-  );
-
-  // Create payment payload
-  const payload = await signAuthorization(
-    walletClient,
-    {
-      from: walletClient.account.address,
-      to: selectedPayment.payToAddress,
-      value: BigInt(selectedPayment.amountRequired * 10**18),
-      validAfter: Math.floor(Date.now() / 1000),
-      validBefore: Math.floor(Date.now() / 1000) + 300
-    },
-    selectedPayment
-  );
-
-  // Retry with payment
-  const paymentHeader = Buffer.from(JSON.stringify(payload)).toString("base64");
-  const response = await axios.get("http://localhost:4021/api", {
-    headers: {
-      "X-PAYMENT": paymentHeader
-    }
-  });
-
-  console.log("Success:", response.data);
-}
 ```
 
-### Example 4: Environment Configuration
+###  Environment Configuration
 
 **Server `.env`:**
 ```bash
-FACILITATOR_URL=https://facilitator.aeon.xyz
-NETWORK=bsc
-EVM_ADDRESS=0xPayToAddress
-PORT=4021
+EVM_ADDRESS=0x2EC8A3D26b720c7a2B16f582d883F7980EEA3628
+SVM_ADDRESS=53KCTzCNQYNyp84bQD84F2gac2ioPU7AGLm76JmoLpWE
+FACILITATOR_URL=http://localhost:3001
+API_KEY=4556
 ```
 
 **Client `.env`:**
 ```bash
-RESOURCE_SERVER_URL=http://localhost:4021
 EVM_PRIVATE_KEY=0xYourPrivateKeyHere
-```
-
-**Loading configuration:**
-```typescript
-import dotenv from "dotenv";
-dotenv.config();
-
-const config = {
-  facilitatorUrl: process.env.FACILITATOR_URL,
-  network: process.env.NETWORK,
-  evmAddress: process.env.EVM_ADDRESS,
-  port: parseInt(process.env.PORT || "4021")
-};
+SVM_PRIVATE_KEY=0xYourPrivateKeyHere
+RESOURCE_SERVER_URL=http://localhost:4021
+ENDPOINT_PATH=/weather
+PRIVATE_KEY=0xYourPrivateKeyHere
 ```
 
 ---
@@ -807,21 +750,6 @@ const config = {
 
 ## API Reference Summary
 
-### Server Functions
-
-| Function | Purpose |
-|----------|---------|
-| `paymentMiddleware(config, facilitator)` | Protect routes with payments |
-| `createRouteConfigFromPrice(price, network, address)` | Create route config from price |
-
-### Client Functions
-
-| Function | Purpose                       |
-|----------|-------------------------------|
-| `withPaymentInterceptor(axios, wallet, options?)` | Add payment handling to Axios |
-| `signAuthorization(client, params, requirements)` | Sign payment authorization    |
-| `signAuthorizationEip3009(client, params, requirements)` | Sign payment authorization, this process includes both pre-authorization and signature.  |
-
 ### Core Types
 
 | Type | Purpose |
@@ -836,12 +764,7 @@ const config = {
 ## Support & Resources
 
 - **Documentation**: [https://docs.aeon.xyz](https://docs.aeon.xyz)
-- **NPM Packages**:
-  - `@aeon-ai-pay/x402` - Core library
-  - `@aeon-ai-pay/x402-hono` - Hono middleware
-  - `@aeon-ai-pay/x402-axios` - Axios interceptor
 - **Facilitator**: [https://facilitator.aeon.xyz](https://facilitator.aeon.xyz)
-- **Demo**: [https://x402-demo.aeon.xyz/weather](https://x402-demo.aeon.xyz/weather)
 
 ---
 
