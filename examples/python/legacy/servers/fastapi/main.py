@@ -20,9 +20,9 @@ app = FastAPI()
 # Apply payment middleware to specific routes
 app.middleware("http")(
     require_payment(
-        # path="/weather",
-        # pay_to_address=ADDRESS,
-        # facilitator_config={"url": "http://127.0.0.1:3001"},
+        path="/weather",
+        pay_to_address=ADDRESS,
+        facilitator_config={"url": "https://facilitator-test.aeon.xyz"},
         # price=TokenAmount(
         #     amount="1000",
         #     asset=TokenAsset(
@@ -40,9 +40,6 @@ app.middleware("http")(
         #     ),
         # ),
         # network="base",
-        path="/weather",
-        pay_to_address=ADDRESS,
-        facilitator_config={"url": "http://127.0.0.1:3001"},
         # price=TokenAmount(
         #     amount="1000",
         #     asset=TokenAsset(
