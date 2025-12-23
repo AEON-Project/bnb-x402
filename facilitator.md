@@ -49,28 +49,124 @@ Used to validate the legitimacy of payment requirement parameters, signature inf
 #### 3.2.4 Request Body
 The request body is in JSON format, containing the following fields:
 
-| First-level Field     | Type   | Required | Description                                                                 |  
-|-----------------------|--------|----------|-----------------------------------------------------------------------------|  
-| payload               | string | Yes      | Encoded payment-related payload (Base64-encoded JSON string containing core information such as signatures) |  
-| paymentRequirements   | object | Yes      | Detailed parameters of payment requirements                                 |  
+| First-level Field   | Type   | Required | Description                                                                                         |  
+|---------------------|--------|----------|-----------------------------------------------------------------------------------------------------|  
+| paymentPayload      | object | Yes      | Payment-related payload (This information is crucial, primarily for signing purposes) |  
+| paymentRequirements | object | Yes      | Detailed parameters of payment requirements                                                         |  
 
+
+**Description of `paymentPayload:` fields**:
+
+##  PaymentPayload Top-Level Fields
+
+| Second-level Field |Type|Required|Description|Example Value|
+|--------------------|---|---|---|---|
+| x402Version        |number|Yes|x402 protocol version number, fixed as 2|2|
+| payload            |object|Yes|Core payload information for payment authorization, including authorization parameters and signature|{"authorization":{"from":"0x34B7FE106891a07528b4F2e5E339C32DA13cF510",...},"signature":"0x13c148ab519215be61c5c9e22aaea37feed3d70b612e481d7fe57108457f9eea254b17e19bfda3fe8c9912f33c2abee6188956db98a8acab3e8bb5edcdda19201b"}|
+| resource           |object|Yes|Information about accessible resources after payment|{"url":"http://localhost:4021/weather","description":"Weather data","mimeType":"application/json"}|
+| accepted           |object|Yes|Payment terms accepted by the payee, consistent with PaymentRequirements structure|{"scheme":"exact","network":"eip155:56","amount":"10000","asset":"0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",...}|
+## PaymentPayload.payload Subfields
+
+| Second-level Field |Type|Required|Description|Example Value|
+|--------------------|---|---|---|---|
+| authorization      |object|Yes|Core parameter set for payment authorization|{"from":"0x34B7FE106891a07528b4F2e5E339C32DA13cF510","to":"0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628","value":"10000",...}|
+| signature          |string|Yes|Digital signature of the payload by the payer |0x13c148ab519215be61c5c9e22aaea37feed3d70b612e481d7fe57108457f9eea254b17e19bfda3fe8c9912f33c2abee6188956db98a8acab3e8bb5edcdda19201b|
+## PaymentPayload.payload.authorization Subfields
+
+| Second-level Field |Type|Required|Description|Example Value|
+|--------------------|---|---|---|---|
+| from               |string|Yes|Payer's address |0x34B7FE106891a07528b4F2e5E339C32DA13cF510|
+| to                 |string|Yes|Recipient address |0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628|
+| value              |string|Yes|Payment amount|10000|
+| validAfter         |string|Yes|Authorization effective timestamp |1766455877|
+| validBefore        |string|Yes|Authorization expiration timestamp |1766456777|
+| nonce              |string|Yes|Random number to prevent replay attacks|0x76688160ef13a286971315a6757794a3840b8eb837cdb2ebae849ce410e3891f|
+## PaymentPayload.resource Subfields
+
+| Second-level Field |Type| Required |Description| Example Value                 |
+|--------------------|---|-------|---|-------------------------------|
+| url                |string| Yes   |URL of the resource corresponding to the payment| http://localhost:4021/weather |
+| description        |string| Yes   |Resource description| resource description                           |
+| mimeType           |string| No    |MIME type of the resource| application/json              |
+## PaymentPayload.accepted Subfields
+
+| Second-level Field |Type|Required| Description                                                         | Example Value                              |
+|--------------------|---|---|---------------------------------------------------------------------|--------------------------------------------|
+| scheme             |string|Yes| Payment scheme type, fixed as `exact`                               | exact                                      |
+| network            |string|Yes| Blockchain network (e.g., 56 corresponds to Binance Smart Chain)    | eip155:56                                  |
+| networkId          |string|Yes| Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain) | 56                                         |
+| amount             |string|Yes| Payment amount value                                                | 10000                                      |
+| asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
+| payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
+| maxTimeoutSeconds  |number|Yes| Payment timeout period (unit: seconds)                              | 300                                        |
+| extra              |object|Yes| Additional supplementary information related to payment             | {"name":"USDT","version":"1"}              |
+
+**JSON Example**:
+```json
+  {
+  "x402Version": 2,
+  "payload": {
+    "authorization": {
+      "from": "0x34B7FE106891a07528b4F2e5E339C32DA13cF510",
+      "to": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+      "value": "10000",
+      "validAfter": "1766455877",
+      "validBefore": "1766456777",
+      "nonce": "0x76688160ef13a286971315a6757794a3840b8eb837cdb2ebae849ce410e3891f"
+    },
+    "signature": "0x13c148ab519215be61c5c9e22aaea37feed3d70b612e481d7fe57108457f9eea254b17e19bfda3fe8c9912f33c2abee6188956db98a8acab3e8bb5edcdda19201b"
+  },
+  "resource": {
+    "url": "http://localhost:4021/weather",
+    "description": "Weather data",
+    "mimeType": "application/json"
+  },
+  "accepted": {
+    "scheme": "exact",
+    "network": "eip155:56",
+    "networkId": "56",
+    "amount": "10000",
+    "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+    "payTo": "0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628",
+    "maxTimeoutSeconds": 300,
+    "extra": {
+      "name": "USDT",
+      "version": "1"
+    }
+  }
+}
+```
 
 **Description of `paymentRequirements` fields**:
 
-| Second-level Field     | Type   | Required | Description                                                                 | Example Value                                      |  
-|------------------------|--------|----------|-----------------------------------------------------------------------------|-----------------------------------------------------|  
-| scheme                 | string | Yes      | Payment scheme type, fixed as `exact`                                       | `exact`                                             |  
-| namespace              | string | Yes      | Blockchain namespace (use `evm` for EVM-compatible chains)                   | `evm`                                               |  
-| tokenAddress           | string | Yes      | Contract address of the payment token (EVM chain format)                    | `0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E`         |  
-| amountRequired         | number | Yes      | Required payment amount (human-readable format)                             | `0.01`                                              |  
-| amountRequiredFormat   | string | Yes      | Amount format, fixed as `humanReadable` (non-minimal unit)                   | `humanReadable`                                     |  
-| networkId              | string | Yes      | Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain)          | `56`                                                |  
-| payToAddress           | string | Yes      | Recipient address (EVM chain format)                                        | `0xA0a35e76e4476Bd62fe452899af7aEa6D1B20aB7`         |  
-| description            | string | Yes      | Payment description (e.g., resource access instructions)                    | `Premium content access with TESTU`                 |  
-| tokenDecimals          | number | Yes      | Number of decimal places of the token (usually 18)                           | `18`                                                |  
-| tokenSymbol            | string | Yes      | Token symbol                                                                | `TESTU`                                             |  
-| resource               | string | Yes      | URL of the resource corresponding to the payment (e.g., content access URL) | `http://localhost:4021/premium/content`             |  
+| Second-level Field |Type|Required| Description                                                         | Example Value                              |
+|--------------------|---|---|---------------------------------------------------------------------|--------------------------------------------|
+| scheme             |string|Yes| Payment scheme type, fixed as `exact`                               | exact                                      |
+| network            |string|Yes| Blockchain network (e.g., 56 corresponds to Binance Smart Chain)    | eip155:56                                  |
+| networkId          |string|Yes| Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain) | 56                                         |
+| amount             |string|Yes| Payment amount value                                                | 10000                                      |
+| asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
+| payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
+| maxTimeoutSeconds  |number|Yes| Payment timeout period (unit: seconds)                              | 300                                        |
+| extra              |object|Yes| Additional supplementary information related to payment             | {"name":"USDT","version":"1"}              |
 
+
+**JSON Example**:
+```json
+{
+	"scheme": "exact",
+	"network": "eip155:56",
+	"networkId": "56",
+	"amount": "10000",
+	"asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+	"payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+	"maxTimeoutSeconds": 300,
+	"extra": {
+		"name": "USDT",
+		"version": "1"
+	}
+}
+```
 
 ### 3.3 Response Information
 
@@ -78,22 +174,12 @@ The request body is in JSON format, containing the following fields:
 - **Status Code**: `200 OK`
 - **Response Body**:
   ```json  
-  {  
-    "isValid": true,
-    "type": "payload"
-  }  
-  ```  
-- **verifyheaders**: 
-   ```json {
-    "x-powered-by": "Express",
-    "content-type": "application/json; charset=utf-8",
-    "content-length": "33",
-    "etag": "W/21-VdI4kxX6pkOFCWYq2jYO1Tz2sD4",
-    "date": "Fri, 14 Nov 2025 08:45:50 GMT",
-    "connection": "keep-alive",
-    "keep-alive": "timeout=5"
-    }
-  ``` 
+   {
+     "isValid": true,
+     "invalidReason": "undefined",
+     "payer": "0x34B7FE106891a07528b4F2e5E339C32DA13cF510"
+   }
+  ```
   
 
 
@@ -102,19 +188,9 @@ The request body is in JSON format, containing the following fields:
 - **Response Body**:
   ```json  
   {
-  "error": "Invalid API key - external validation failed"
-  }
-  ```  
-- **Error Response Headers**:
-  ```json 
-  {
-    "x-powered-by": "Express",
-    "content-type": "application/json; charset=utf-8",
-    "content-length": "56",
-    "etag": "W/\"38-SCeDq9JH0RX2yP66KV0Q9H3RCMk\"",
-    "date": "Fri, 14 Nov 2025 10:36:00 GMT",
-    "connection": "keep-alive",
-    "keep-alive": "timeout=5"
+  "isValid": false,
+  "invalidReason": "Missing or invalid Authorization header. Expected: Bearer <API_KEY>.",
+  "payer": "0x34B7FE106891a07528b4F2e5E339C32DA13cF510"
   }
   ```
 
@@ -125,19 +201,51 @@ curl --location '[Base URL]/verify' \
 --header 'Content-Type: application/json' \  
 --header 'Authorization: Bearer 123' \  
 --data '{
-	"payload": "eyJ4NDAyVmVyc2lvbiI6MSwic2NoZW1lIjoiZXhhY3QiLCJuYW1lc3BhY2UiOiJldm0iLCJuZXR3b3JrSWQiOiI1NiIsInJlc291cmNlIjoiaHR0cDovL2xvY2FsaG9zdDo0MDIxL3dlYXRoZXIiLCJwYXlsb2FkIjp7InR5cGUiOiJhdXRob3JpemF0aW9uIiwic2lnbmF0dXJlIjoiMHg1NjQyNGMzM2JlNGI3Njk2MGUwMDA3OWE2JlZDAyZDRhMWIxNGU5MWI\nzNTExY2M1ZTUzMDFkYTZlZWViZjE5NmZhNTkxYzVmZmY0NGVhMDc5ODQ3OWVkYmIyOTNhMGIwNGIzN2E1MDM2NDhkNGVhMGIxYjcxM2RmNjQyM2JiZjFjIiwiYXV0aG9yaXphdGlvbiI6eyJmcm9tIjoiMHhBMGEzNWU3NmU0NDc2QmQ2MmZlNDUyODk5YWY3YUVhNkQxQjIwYUI3IiwidG8iOiIweEQyMWFGMDUwOEUxM0ZjNjJEYkE0RDE1MzlBNWREOEQ4OWNmOERmMTQiLCJ2YWx1ZSI6IjEwMDAwMDAwMDAwMDAwMDAiLCJ2YWxpZEFmdGVyIjoiMTc2MzEwOTg4MCIsInZhbGlkQmVmb3JlIjoiMTc2MzExMDU0MCIsIm5vbmNlIjoiMHg4YmM2ZTQ4NzhlMGVmZTFjMDRhMjFmYzJlNGRlMWVjMDEyNDU3MjNiZWFkYmVlYjAxN2NmNzA3YmNiZWIwZmJiIiwidmVyc2lvbiI6IjEifX19",
-	"paymentRequirements": {
-		"scheme": "exact",
-		"namespace": "evm",
-		"tokenAddress": "0x55d398326f99059ff775485246999027b3197955",
-		"amountRequired": 0.001,
-		"amountRequiredFormat": "humanReadable",
-		"payToAddress": "0xD21aF0508E13Fc62DbA4D1539A5dD8D89cf8Df14",
-		"networkId": "56",
-		"tokenDecimals": 18,
-		"tokenSymbol": "USDT",
-		"resource": "http://localhost:4021/weather"
-	}
+    "paymentPayload": {
+        "x402Version": 2,
+        "payload": {
+            "authorization": {
+                "from": "0x34B7FE106891a07528b4F2e5E339C32DA13cF510",
+                "to": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+                "value": "10000",
+                "validAfter": "1766455877",
+                "validBefore": "1766456777",
+                "nonce": "0x76688160ef13a286971315a6757794a3840b8eb837cdb2ebae849ce410e3891f"
+            },
+            "signature": "0x13c148ab519215be61c5c9e22aaea37feed3d70b612e481d7fe57108457f9eea254b17e19bfda3fe8c9912f33c2abee6188956db98a8acab3e8bb5edcdda19201b"
+        },
+        "resource": {
+            "url": "http://localhost:4021/weather",
+            "description": "Weather data",
+            "mimeType": "application/json"
+        },
+        "accepted": {
+            "scheme": "exact",
+            "network": "eip155:56",
+            "networkId": "56",
+            "amount": "10000",
+            "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+            "payTo": "0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628",
+            "maxTimeoutSeconds": 300,
+            "extra": {
+                "name": "USDT",
+                "version": "1"
+            }
+        }
+    },
+    "paymentRequirements": {
+        "scheme": "exact",
+        "network": "eip155:56",
+        "networkId": "56",
+        "amount": "10000",
+        "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+        "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+        "maxTimeoutSeconds": 300,
+        "extra": {
+            "name": "USDT",
+            "version": "1"
+        }
+    }
 }'  
 ```  
 
@@ -170,12 +278,124 @@ Same as the `verify` API:
 #### 4.2.4 Request Body
 The request body is in JSON format, containing the `verifyId` returned by the `verify` API and payment transaction information:
 
-| Field Name         | Type   | Required | Description                                                                 | Example Value                                      |  
-|--------------------|--------|----------|-----------------------------------------------------------------------------|-----------------------------------------------------|  
-| verifyId           | string | Yes      | Unique verification ID returned by the `verify` API (used to associate verification records) | `verify_123456`                                     |  
-| transactionHash    | string | Yes      | Blockchain payment transaction hash (must match the payment parameters in `verify`) | `0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef` |  
-| timestamp          | number | Yes      | Timestamp of transaction completion (in milliseconds)                        | `1718236800000`                                     |  
+| First-level Field   | Type   | Required | Description                                                                                         |  
+|---------------------|--------|----------|-----------------------------------------------------------------------------------------------------|  
+| paymentPayload      | object | Yes      | Payment-related payload (This information is crucial, primarily for signing purposes) |  
+| paymentRequirements | object | Yes      | Detailed parameters of payment requirements                                                         |  
 
+
+**Description of `paymentPayload:` fields**:
+
+##  PaymentPayload Top-Level Fields
+
+| Second-level Field |Type|Required|Description|Example Value|
+|--------------------|---|---|---|---|
+| x402Version        |number|Yes|x402 protocol version number, fixed as 2|2|
+| payload            |object|Yes|Core payload information for payment authorization, including authorization parameters and signature|{"authorization":{"from":"0x34B7FE106891a07528b4F2e5E339C32DA13cF510",...},"signature":"0x13c148ab519215be61c5c9e22aaea37feed3d70b612e481d7fe57108457f9eea254b17e19bfda3fe8c9912f33c2abee6188956db98a8acab3e8bb5edcdda19201b"}|
+| resource           |object|Yes|Information about accessible resources after payment|{"url":"http://localhost:4021/weather","description":"Weather data","mimeType":"application/json"}|
+| accepted           |object|Yes|Payment terms accepted by the payee, consistent with PaymentRequirements structure|{"scheme":"exact","network":"eip155:56","amount":"10000","asset":"0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",...}|
+## PaymentPayload.payload Subfields
+
+| Second-level Field |Type|Required|Description|Example Value|
+|--------------------|---|---|---|---|
+| authorization      |object|Yes|Core parameter set for payment authorization|{"from":"0x34B7FE106891a07528b4F2e5E339C32DA13cF510","to":"0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628","value":"10000",...}|
+| signature          |string|Yes|Digital signature of the payload by the payer |0x13c148ab519215be61c5c9e22aaea37feed3d70b612e481d7fe57108457f9eea254b17e19bfda3fe8c9912f33c2abee6188956db98a8acab3e8bb5edcdda19201b|
+## PaymentPayload.payload.authorization Subfields
+
+| Second-level Field |Type|Required|Description|Example Value|
+|--------------------|---|---|---|---|
+| from               |string|Yes|Payer's address |0x34B7FE106891a07528b4F2e5E339C32DA13cF510|
+| to                 |string|Yes|Recipient address |0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628|
+| value              |string|Yes|Payment amount|10000|
+| validAfter         |string|Yes|Authorization effective timestamp |1766455877|
+| validBefore        |string|Yes|Authorization expiration timestamp |1766456777|
+| nonce              |string|Yes|Random number to prevent replay attacks|0x76688160ef13a286971315a6757794a3840b8eb837cdb2ebae849ce410e3891f|
+## PaymentPayload.resource Subfields
+
+| Second-level Field |Type| Required |Description| Example Value                 |
+|--------------------|---|-------|---|-------------------------------|
+| url                |string| Yes   |URL of the resource corresponding to the payment| http://localhost:4021/weather |
+| description        |string| Yes   |Resource description| resource description                           |
+| mimeType           |string| No    |MIME type of the resource| application/json              |
+## PaymentPayload.accepted Subfields
+
+| Second-level Field |Type|Required| Description                                                         | Example Value                              |
+|--------------------|---|---|---------------------------------------------------------------------|--------------------------------------------|
+| scheme             |string|Yes| Payment scheme type, fixed as `exact`                               | exact                                      |
+| network            |string|Yes| Blockchain network (e.g., 56 corresponds to Binance Smart Chain)    | eip155:56                                  |
+| networkId          |string|Yes| Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain) | 56                                         |
+| amount             |string|Yes| Payment amount value                                                | 10000                                      |
+| asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
+| payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
+| maxTimeoutSeconds  |number|Yes| Payment timeout period (unit: seconds)                              | 300                                        |
+| extra              |object|Yes| Additional supplementary information related to payment             | {"name":"USDT","version":"1"}              |
+
+**JSON Example**:
+```json
+  {
+  "x402Version": 2,
+  "payload": {
+    "authorization": {
+      "from": "0x34B7FE106891a07528b4F2e5E339C32DA13cF510",
+      "to": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+      "value": "10000",
+      "validAfter": "1766455877",
+      "validBefore": "1766456777",
+      "nonce": "0x76688160ef13a286971315a6757794a3840b8eb837cdb2ebae849ce410e3891f"
+    },
+    "signature": "0x13c148ab519215be61c5c9e22aaea37feed3d70b612e481d7fe57108457f9eea254b17e19bfda3fe8c9912f33c2abee6188956db98a8acab3e8bb5edcdda19201b"
+  },
+  "resource": {
+    "url": "http://localhost:4021/weather",
+    "description": "Weather data",
+    "mimeType": "application/json"
+  },
+  "accepted": {
+    "scheme": "exact",
+    "network": "eip155:56",
+    "networkId": "56",
+    "amount": "10000",
+    "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+    "payTo": "0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628",
+    "maxTimeoutSeconds": 300,
+    "extra": {
+      "name": "USDT",
+      "version": "1"
+    }
+  }
+}
+```
+
+**Description of `paymentRequirements` fields**:
+
+| Second-level Field |Type|Required| Description                                                         | Example Value                              |
+|--------------------|---|---|---------------------------------------------------------------------|--------------------------------------------|
+| scheme             |string|Yes| Payment scheme type, fixed as `exact`                               | exact                                      |
+| network            |string|Yes| Blockchain network (e.g., 56 corresponds to Binance Smart Chain)    | eip155:56                                  |
+| networkId          |string|Yes| Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain) | 56                                         |
+| amount             |string|Yes| Payment amount value                                                | 10000                                      |
+| asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
+| payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
+| maxTimeoutSeconds  |number|Yes| Payment timeout period (unit: seconds)                              | 300                                        |
+| extra              |object|Yes| Additional supplementary information related to payment             | {"name":"USDT","version":"1"}              |
+
+
+**JSON Example**:
+```json
+{
+	"scheme": "exact",
+	"network": "eip155:56",
+	"networkId": "56",
+	"amount": "10000",
+	"asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+	"payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+	"maxTimeoutSeconds": 300,
+	"extra": {
+		"name": "USDT",
+		"version": "1"
+	}
+}
+```
 
 ### 4.3 Response Information
 
@@ -190,18 +410,6 @@ The request body is in JSON format, containing the `verifyId` returned by the `v
   "payer": "0xA0a35e76e4476Bd62fe452899af7aEa6D1B20aB7"
   }  
   ```
-- **settleheaders**: 
-  ```json
-   {
-   "x-powered-by": "Express",
-    "content-type": "application/json; charset=utf-8",
-    "content-length": "170",
-    "etag": "W/aa-JJ1fd5obnqX8fUrlDmWVzQK23pk",
-    "date": "Fri, 14 Nov 2025 08:45:53 GMT",
-    "connection": "keep-alive",
-    "keep-alive": "timeout=5"
-    }
-    ```
 
 
 #### 4.3.2 Failure Response (Settlement Failed)
@@ -209,19 +417,9 @@ The request body is in JSON format, containing the `verifyId` returned by the `v
 - **Response Body**:
   ```json  
   {
-  "error": "Invalid API key - external validation failed"
-  }
-  ```  
-- **Error Response Headers**:
-  ```json 
-  {
-    "x-powered-by": "Express",
-    "content-type": "application/json; charset=utf-8",
-    "content-length": "56",
-    "etag": "W/38-SCeDq9JH0RX2yP66KV0Q9H3RCMk\"",
-    "date": "Fri, 14 Nov 2025 10:36:00 GMT",
-    "connection": "keep-alive",
-    "keep-alive": "timeout=5"
+  "isValid": false,
+  "invalidReason": "Missing or invalid Authorization header. Expected: Bearer <API_KEY>.",
+  "payer": "0x34B7FE106891a07528b4F2e5E339C32DA13cF510"
   }
   ```
 
@@ -232,49 +430,112 @@ curl --location '[Base URL]/settle' \
 --header 'Content-Type: application/json' \  
 --header 'Authorization: Bearer 123' \  
 --data '{
-  "payload": "eyJ4NDAyVmVyc2lvbiI6MSwic2NoZW1lIjoiZXhhY3QiLCJuYW1lc3BhY2UiOiJldm0iLCJuZXR3b3JrSWQiOiI1NiIsInJlc291cmNlIjoiaHR0cDovL2xvY2FsaG9zdDo0MDIxL3dlYXRoZXIiLCJwYXlsb2FkIjp7InR5cGUiOiJhdXRob3JpemF0aW9uIiwic2lnbmF0dXJlIjoiMHg1NjQyNGMzM2JlNGI3Njk2MGUwMDA3OWE2JlZDAyZDRhMWIxNGU5MWI nzNTExY2M1ZTUzMDFkYTZlZWViZjE5NmZhNTkxYzVmZmY0NGVhMDc5ODQ3OWVkYmIyOTNhMGIwNGIzN2E1MDM2NDhkNGVhMGIxYjcxM2RmNjQyM2JiZjFjIiwiYXV0aG9yaXphdGlvbiI6eyJmcm9tIjoiMHhBMGEzNWU3NmU0NDc2QmQ2MmZlNDUyODk5YWY3YUVhNkQxQjIwYUI3IiwidG8iOiIweEQyMWFGMDUwOEUxM0ZjNjJEYkE0RDE1MzlBNWREOEQ4OWNmOERmMTQiLCJ2YWx1ZSI6IjEwMDAwMDAwMDAwMDAwMDAiLCJ2YWxpZEFmdGVyIjoiMTc2MzEwOTg4MCIsInZhbGlkQmVmb3JlIjoiMTc2MzExMDU0MCIsIm5vbmNlIjoiMHg4YmM2ZTQ4NzhlMGVmZTFjMDRhMjFmYzJlNGRlMWVjMDEyNDU3MjNiZWFkYmVlYjAxN2NmNzA3YmNiZWIwZmJiIiwidmVyc2lvbiI6IjEifX19",
-  "paymentRequirements": {
-    "scheme": "exact",
-    "namespace": "evm",
-    "tokenAddress": "0x55d398326f99059ff775485246999027b3197955",
-    "amountRequired": 0.001,
-    "amountRequiredFormat": "humanReadable",
-    "payToAddress": "0xD21aF0508E13Fc62DbA4D1539A5dD8D89cf8Df14",
-    "networkId": "56",
-    "tokenDecimals": 18,
-    "tokenSymbol": "USDT",
-    "resource": "http://localhost:4021/weather"
-  }
-}' 
+    "paymentPayload": {
+        "x402Version": 2,
+        "payload": {
+            "authorization": {
+                "from": "0x34B7FE106891a07528b4F2e5E339C32DA13cF510",
+                "to": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+                "value": "10000",
+                "validAfter": "1766455877",
+                "validBefore": "1766456777",
+                "nonce": "0x76688160ef13a286971315a6757794a3840b8eb837cdb2ebae849ce410e3891f"
+            },
+            "signature": "0x13c148ab519215be61c5c9e22aaea37feed3d70b612e481d7fe57108457f9eea254b17e19bfda3fe8c9912f33c2abee6188956db98a8acab3e8bb5edcdda19201b"
+        },
+        "resource": {
+            "url": "http://localhost:4021/weather",
+            "description": "Weather data",
+            "mimeType": "application/json"
+        },
+        "accepted": {
+            "scheme": "exact",
+            "network": "eip155:56",
+            "networkId": "56",
+            "amount": "10000",
+            "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+            "payTo": "0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628",
+            "maxTimeoutSeconds": 300,
+            "extra": {
+                "name": "USDT",
+                "version": "1"
+            }
+        }
+    },
+    "paymentRequirements": {
+        "scheme": "exact",
+        "network": "eip155:56",
+        "networkId": "56",
+        "amount": "10000",
+        "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+        "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+        "maxTimeoutSeconds": 300,
+        "extra": {
+            "name": "USDT",
+            "version": "1"
+        }
+    }
+}'
 ```  
 
 
 ## 5. HTTP Status Codes
 
-| Code | Meaning | Description |
-|------|---------|-------------|
-| `200` | OK | Request successful, payment processed |
+| Code  | Meaning          | Description |
+|-------|------------------|-------------|
+| `200` | OK               | Request successful, payment processed |
+| `401` | Error            | Missing or invalid Authorization header. Expected: Bearer <API_KEY> |
 | `402` | Payment Required | Payment needed to access resource |
-| `400` | Bad Request | Invalid payment payload |
-| `403` | Forbidden | Payment verification failed |
-| `500` | Server Error | Internal error processing payment |
+| `400` | Bad Request      | Invalid payment payload |
+| `403` | Forbidden        | Payment verification failed |
+| `500` | Server Error     | Internal error processing payment |
 
 ### Error Reasons
 
 When payment verification fails, the response includes an `invalidReason`:
 
-| Reason | Description |
-|--------|-------------|
-| `insufficient_funds` | Payer has insufficient balance |
-| `invalid_exact_evm_payload_authorization_valid_after` | Authorization not yet valid |
-| `invalid_exact_evm_payload_authorization_valid_before` | Authorization expired |
-| `invalid_exact_evm_payload_authorization_value` | Incorrect payment amount |
-| `invalid_exact_evm_payload_signature` | Invalid signature |
-| `invalid_exact_evm_payload_recipient_mismatch` | Wrong recipient address |
-| `invalid_network` | Unsupported or wrong network |
-| `invalid_payload` | Malformed payment payload |
-| `invalid_scheme` | Unsupported payment scheme |
-| `invalid_x402_version` | Incompatible protocol version |
+| Reason                                                                                | Description |
+|---------------------------------------------------------------------------------------|-------------|
+| insufficient_funds                                                                    | The account does not have enough balance to complete the transaction |
+| invalid_exact_evm_payload_authorization_valid_after                                   | The `valid_after` timestamp in the EVM payload authorization is invalid |
+| invalid_exact_evm_payload_authorization_valid_before                                  | The `valid_before` timestamp in the EVM payload authorization is invalid |
+| invalid_exact_evm_payload_authorization_value                                         | The value specified in the EVM payload authorization is invalid |
+| invalid_exact_evm_payload_signature                                                   | The signature of the exact EVM payload is invalid or does not match |
+| invalid_exact_evm_payload_undeployed_smart_wallet                                     | The smart wallet referenced in the EVM payload has not been deployed yet |
+| invalid_exact_evm_payload_recipient_mismatch                                          | The recipient address in the EVM payload does not match the expected value |
+| invalid_exact_svm_payload_transaction                                                 | The exact SVM payload transaction is malformed or invalid |
+| invalid_exact_svm_payload_transaction_amount_mismatch                                 | The transaction amount in the SVM payload does not match the required amount |
+| invalid_exact_svm_payload_transaction_create_ata_instruction                          | The Create Associated Token Account (ATA) instruction in the SVM payload is invalid |
+| invalid_exact_svm_payload_transaction_create_ata_instruction_incorrect_payee          | The payee address in the Create ATA instruction of the SVM payload is incorrect |
+| invalid_exact_svm_payload_transaction_create_ata_instruction_incorrect_asset          | The asset type in the Create ATA instruction of the SVM payload is incorrect |
+| invalid_exact_svm_payload_transaction_instructions                                    | The instructions included in the SVM payload transaction are invalid |
+| invalid_exact_svm_payload_transaction_instructions_length                             | The length of the instructions list in the SVM payload transaction is invalid |
+| invalid_exact_svm_payload_transaction_instructions_compute_limit_instruction          | The compute limit instruction in the SVM payload transaction is invalid |
+| invalid_exact_svm_payload_transaction_instructions_compute_price_instruction          | The compute price instruction in the SVM payload transaction is invalid |
+| invalid_exact_svm_payload_transaction_instructions_compute_price_instruction_too_high | The compute price specified in the SVM payload transaction instruction is too high |
+| invalid_exact_svm_payload_transaction_instruction_not_spl_token_transfer_checked      | The instruction in the SVM payload is not a valid SPL Token TransferChecked instruction |
+| invalid_exact_svm_payload_transaction_instruction_not_token_2022_transfer_checked     | The instruction in the SVM payload is not a valid Token 2022 TransferChecked instruction |
+| invalid_exact_svm_payload_transaction_fee_payer_included_in_instruction_accounts      | The fee payer address is incorrectly included in the instruction accounts list of the SVM payload transaction |
+| invalid_exact_svm_payload_transaction_fee_payer_transferring_funds                    | The fee payer is attempting to transfer funds in the SVM payload transaction, which is not allowed |
+| invalid_exact_svm_payload_transaction_not_a_transfer_instruction                      | The instruction in the SVM payload transaction is not a valid token transfer instruction |
+| invalid_exact_svm_payload_transaction_receiver_ata_not_found                          | The Associated Token Account (ATA) for the receiver does not exist |
+| invalid_exact_svm_payload_transaction_sender_ata_not_found                            | The Associated Token Account (ATA) for the sender does not exist |
+| invalid_exact_svm_payload_transaction_simulation_failed                               | Simulation of the SVM payload transaction failed before execution |
+| invalid_exact_svm_payload_transaction_transfer_to_incorrect_ata                       | The token transfer in the SVM payload is directed to an incorrect Associated Token Account (ATA) |
+| invalid_network                                                                       | The network specified for the transaction is invalid or unsupported |
+| invalid_payload                                                                       | The transaction payload is malformed, incomplete, or otherwise invalid |
+| invalid_payment_requirements                                                          | The payment requirements defined in the transaction are invalid |
+| invalid_scheme                                                                        | The payment or transaction scheme specified is invalid |
+| invalid_payment                                                                       | The payment details provided are invalid or cannot be processed |
+| payment_expired                                                                       | The payment has expired and can no longer be processed |
+| unsupported_scheme                                                                    | The payment or transaction scheme specified is not supported |
+| invalid_x402_version                                                                  | The X402 protocol version specified is invalid |
+| invalid_transaction_state                                                             | The current state of the transaction is invalid for the requested operation |
+| settle_exact_svm_block_height_exceeded                                                | The block height limit for settling the SVM transaction has been exceeded |
+| settle_exact_svm_transaction_confirmation_timed_out                                   | The confirmation process for the SVM transaction has timed out |
+| unexpected_settle_error                                                               | An unexpected error occurred while attempting to settle the transaction |
+| unexpected_verify_error                                                               | An unexpected error occurred while attempting to verify the transaction or payload |
+
 
 ## 6. Example of ERC20 pre-authorization and signature without support for EIP3009
 1. **pre-authorization** :
