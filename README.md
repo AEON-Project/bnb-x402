@@ -393,7 +393,7 @@ The x402 protocol supports two payment types:
 Eip3009 will be executed by a facilitator
 please see [facilitator](./facilitator.md)
 
-```
+
 #### Payment process
 1. **Initial Request**: Client makes standard HTTP request
 2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
