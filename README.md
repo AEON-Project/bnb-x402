@@ -34,17 +34,6 @@ The BNB x402 protocol enables HTTP-native blockchain payments for API access. Th
 ![x402 Protocol Flow](./static/flow.png)
 
 **Flow Description:**
-1.  Client Application makes GET request to /api
-2.  Server responds with 402 Payment Required and returns payment requirements
-3.  The Client SDK uses the wallet to sign payments, and this process includes both pre-authorization and signature.
-4.  Use a request header with PAYMENT SIGNATURE to request the server
-5.  Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
-5.  Server sends payment to Facilitator for verification
-6.  Server processes request and settles payment
-7.  Server returns 200 OK with content to Client Application
-
-
-**Flow Description:**
 1. **Initial Request**: Client makes standard HTTP request
 2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
 3. **Payment Selection**: Client SDK selects appropriate payment method,like bsc chain.
