@@ -275,7 +275,6 @@ Base64 decoded data
 }
 ```
 
-
 ### Quick Start - Client
 
 ```typescript
