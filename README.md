@@ -46,7 +46,7 @@ The BNB x402 protocol enables HTTP-native blockchain payments for API access. Th
 8. **Submit tx**: If settle is complete,Submit transaction hash.
 9. **Tx confirmed**: Return the confirmed result of tx.
 10. **Facilitator Response**: The server received a "200 OK" message with transaction details and response body containing tx_hash.
-11. **Server Response**: If facilitator reponse status is settled,Client receives `200 OK` with response body.
+11. **Server Response**: If facilitator reponse status is settled,Client receives `200 OK` and the detailed information of the transaction results.
 
 
 > Submit the payment paymentPayload and paymentRequirements object, and let the facilitator complete the verification and settlement.
