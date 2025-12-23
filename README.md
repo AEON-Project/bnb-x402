@@ -102,7 +102,7 @@ if (!facilitatorUrl) {
   process.exit(1);
 }
 
-// 创建 facilitator client，如果提供了 API Key，则配置认证头
+//Create a facilitator client, and if an API Key is provided, configure the authentication header
 const facilitatorClient = new HTTPFacilitatorClient({
   url: facilitatorUrl,
   createAuthHeaders: apiKey
