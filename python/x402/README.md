@@ -19,7 +19,10 @@ x402 is a modern internet-native payment protocol Python SDK that supports block
 
 ```bash
 # Sync project dependencies
-uv sync --python 3.11
-
+uv sync --python 3.10
+```
+```bash
 # Install as editable package
 uv pip install -e .
+```
+

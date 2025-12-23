@@ -10,14 +10,11 @@ Last Updated: December 2025
 
 1. [Overview](#overview)
 2. [Getting Started](#getting-started)
-3. [Authentication & Payment Flow](#authentication--payment-flow)
-4. [Server API Reference](#server-api-reference)
-5. [Payment Requirements](#payment-requirements)
-6. [HTTP Headers](#http-headers)
-7. [Error Handling](#error-handling)
-8. [Supported Networks](#supported-networks)
-9. [Code Examples](#code-examples)
-
+3. [Server API Reference](#server-api-reference)
+4. [Payment Requirements](#payment-requirements)
+5. [HTTP Headers](#http-headers)
+6. [Error Handling](#error-handling)
+7. [Supported Networks](#supported-networks)
 
 ---
 
@@ -37,13 +34,22 @@ The BNB x402 protocol enables HTTP-native blockchain payments for API access. Th
 ![x402 Protocol Flow](./static/flow.png)
 
 **Flow Description:**
-1.  Client Application makes GET request to /api
-2.  Server responds with 402 Payment Required and returns payment requirements
-3.  The Client SDK uses the wallet to sign payments, and this process includes both pre-authorization and signature.
-4.  Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
-5.  Server sends payment to Facilitator for verification
-6.  Server processes request and settles payment
-7.  Server returns 200 OK with content to Client Application
+1. **Client Initial Request**: Client makes standard HTTP request.
+2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
+3. **Payment Selection**: Client SDK selects appropriate payment method,like bsc chain.
+4. **Signature creation and create payload**: 
+     1. Pre-authorized credit limit and payment amount.
+     2. Utilize payload information and employ a contract to generate a signature.
+5. **Facilitator Verification**: The server uses the 'PAYMENT-SIGNATURE' and 'PAYMENT-REQUIRED' interfaces to communicate with the facilitator `/verify` interface.
+6. **Server Get/verify result**: Get the facilitator `/verify` interface response.
+7. **Facilitator Settlement**: If verify is OK, Client send request  with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED` to facilitator for `settle`.
+8. **FacilitatorSubmit tx**: If settle is complete,Submit transaction hash.
+9. **Tx confirmed**: Return the confirmed result of tx.
+10. **Facilitator Response**: The server received a `200` OK message with transaction details and response body containing tx_hash.
+11. **Server Response**: If facilitator reponse status is settled,Client receives `200` OK and the detailed information of the transaction results.
+
+
+> Submit the payment paymentPayload and paymentRequirements object, and let the facilitator complete the verification and settlement.
 
    
 ---
@@ -104,7 +110,7 @@ if (!facilitatorUrl) {
   process.exit(1);
 }
 
-// 创建 facilitator client，如果提供了 API Key，则配置认证头
+//Create a facilitator client, and if an API Key is provided, configure the authentication header
 const facilitatorClient = new HTTPFacilitatorClient({
   url: facilitatorUrl,
   createAuthHeaders: apiKey
@@ -178,6 +184,7 @@ serve({
 console.log(`Server listening at http://localhost:4021`);
 ```
 
+
 ### Quick Start - Client
 
 ```typescript
@@ -193,7 +200,6 @@ import { bsc, xLayer, base } from "viem/chains";
 config();
 
 const evmPrivateKey = process.env.EVM_PRIVATE_KEY as `0x${string}`;
-const svmPrivateKey = process.env.SVM_PRIVATE_KEY as string;
 const baseURL = process.env.RESOURCE_SERVER_URL || "http://localhost:4021";
 const endpointPath = process.env.ENDPOINT_PATH || "/weather";
 const url = `${baseURL}${endpointPath}`;
@@ -206,7 +212,6 @@ const url = `${baseURL}${endpointPath}`;
  *
  * Required environment variables:
  * - EVM_PRIVATE_KEY: The private key of the EVM signer
- * - SVM_PRIVATE_KEY: The private key of the SVM signer
  */
 async function main(): Promise<void> {
   const evmAccount = privateKeyToAccount(evmPrivateKey);
@@ -261,83 +266,123 @@ main().catch(error => {
 
 ```
 
----
 
-## Authentication & Payment Flow
+###  Environment Configuration
 
-### Step-by-Step Flow
+**Server `.env`:**
+```bash
+EVM_ADDRESS=0x2EC8A3D26b720c7a2B16f582d883F7980EEA3628
+SVM_ADDRESS=53KCTzCNQYNyp84bQD84F2gac2ioPU7AGLm76JmoLpWE
+FACILITATOR_URL=http://localhost:3001
+API_KEY=4556
+```
 
-
-
-### Payment Types
-
-The x402 protocol supports two payment types:
-
-#### 1.EIP3009 Authorization 
-
-EIP3009 Pre-authorized payment signature that the facilitator can execute.
-
-During pre-authorization, users only need to sign the EIP-3009 authorization once in their wallet. Afterwards, the merchant can directly deduct the payment for gas within the validity period, Users do not need to pay gas, without requiring the user to confirm again
-
-
-```typescript
+**Client `.env`:**
+```bash
+EVM_PRIVATE_KEY=0xYourPrivateKeyHere
+SVM_PRIVATE_KEY=0xYourPrivateKeyHere
+RESOURCE_SERVER_URL=http://localhost:4021
+ENDPOINT_PATH=/weather
+PRIVATE_KEY=0xYourPrivateKeyHere
+```
+### Use client request server
+### First Request 
+```json
+curl --location 'http://localhost:4021/weather'
+```
+### First Response Header
+```json
+"payment-required":"
+eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cDovL2xvY2FsaG9zdDo0MDIxL3dlYXRoZXIiLCJkZXNjcmlwdGlvbiI6IldlYXRoZXIgZGF0YSIsIm1pbWVUeXBlIjoiYXBwbGljYXRpb24vanNvbiJ9LCJhY2NlcHRzIjpbeyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJlaXAxNTU6MTk2IiwibmV0d29ya0lkIjoiMTk2IiwiYW1vdW50IjoiMTAwMDAiLCJhc3NldCI6IjB4NzRiN2YxNjMzN2I4OTcyMDI3ZjYxOTZhMTdhNjMxYWM2ZGUyNmQyMiIsInBheVRvIjoiMHgyRUM4QTNEMjZiNzIwYzdhMkIxNmY1ODJkODgzRjc5OGJFRUEzNjI4IiwibWF4VGltZW91dFNlY29uZHMiOjMwMCwiZXh0cmEiOnsibmFtZSI6IlVTREMiLCJ2ZXJzaW9uIjoiMiJ9fV19"
+```
+Base64 decoded data
+```json
 {
-  type: "authorizationEip3009",
-  signature: "0x...",
-  nonce: "0x...",
-  version: 1,
-  validAfter: 1234567890,
-  validBefore: 1234567999,
-  from: "0xClientAddress",
-  to: "0xServerAddress",
-  value: "10000000000000000" // Wei
+  "x402Version": 2,
+  "error": "Parameter required",
+  "resource": {
+    "url": "http://localhost:4021/weather",
+    "description": "Weather data",
+    "mimeType": "application/json"
+  },
+  "accesses": [
+    {
+      "scheme": "exact",
+      "network": "ip155:196",
+      "amount": "10000",
+      "asset": "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+      "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+      "maxTimeoutSeconds": 300,
+      "extra": {
+        "name": "USDC",
+        "version": "2"
+      }
+    }
+  ]
 }
 ```
-#### Payment process
-1. **Initial Request**: Client makes standard HTTP request
-2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
-3. **Payment Selection**: Client SDK selects appropriate payment method
-4. **Signature creation and create payload**: The step of pre-authorization involves directly invoking the contract to sign using the payload information.
-5. **Retry with Payment**: Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
-6. **Verification**: Server sends paymentPayload and paymentRequirements to facilitator for verification
-7. **Content Delivery**: Server processes request and returns content
-8. **Settlement**: Server settles paymentPayload and paymentRequirements on-chain via facilitator
-9. **Tx confirmed**: Submit transaction hash and remove transaction results
-10. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` body
-  
 
-#### 2.ERC-20 Authorization 
-Pre-authorized payment signature that the facilitator can execute.
+### First Response Body
+First Response Body is Empty
 
-```typescript
-{
-  type: "authorization",
-  signature: "0x...",
-  nonce: "0x...",
-  version: 1,
-  validAfter: 1234567890,
-  validBefore: 1234567999,
-  from: "0xClientAddress",
-  to: "0xServerAddress",
-  value: "10000000000000000" // Wei
+
+### Second Request 
+```json
+curl --location 'http://localhost:4021/weather' \
+--header 'payment-signature: eyJ4NDAyVmVyc2lvbiI6MiwicGF5bG9hZCI6eyJhdXRob3JpemF0aW9uIjp7ImZyb20iOiIweDM0QjdGRTEwNjg5MWEwNzUyOGI0RjJlNUUzMzlDMzJEQTEzY0Y1MTAiLCJ0byI6IjB4MkVDOEEzRDI2YjcyMGM3YTJCMTZmNTgyZDg4M0Y3OThiRUVBMzYyOCIsInZhbHVlIjoiMTAwMCIsInZhbGlkQWZ0ZXIiOiIxNzY2NDc5NDUxIiwidmFsaWRCZWZvcmUiOiIxNzY2NDgwMzUxIiwibm9uY2UiOiIweDk5Zjc4ZDRkZWMxMjk5MDljZmM2MGQ4ZGEyOWE0YTA4NDcyMGNmZmFkOGI1OWVlNjk4NDliMTU2MGIwOWZkN2MifSwic2lnbmF0dXJlIjoiMHgwOTUzMTg1YmIzYTNkMDllN2IzYzhjMDA1Y2M4NjU0ZDgzMDFkNTEwY2EwMDU3NTUwYzAzNzZhZGMyMDA3YzMwMDM3ZGI1YzUyNTI2YmM0NTBjNjI3ODY3N2UwZTk4M2E5NDk5MmZkZWUyZjhmZWQyOTYzMDg0NmUwZGRjOTJlNDFjIn0sInJlc291cmNlIjp7InVybCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NDAyMS93ZWF0aGVyIiwiZGVzY3JpcHRpb24iOiJXZWF0aGVyIGRhdGEiLCJtaW1lVHlwZSI6ImFwcGxpY2F0aW9uL2pzb24ifSwiYWNjZXB0ZWQiOnsic2NoZW1lIjoiZXhhY3QiLCJuZXR3b3JrIjoiZWlwMTU1Ojg0NTMiLCJuZXR3b3JrSWQiOiI4NDUzIiwiYW1vdW50IjoiMTAwMCIsImFzc2V0IjoiMHg4MzM1ODlmQ0Q2ZURiNkUwOGY0YzdDMzJENGY3MWI1NGJkQTAyOTEzIiwicGF5VG8iOiIweDJFQzhBM0QyNmI3MjBjN2EyQjE2ZjU4MmQ4ODNGNzk4YkVFQTM2MjgiLCJtYXhUaW1lb3V0U2Vjb25kcyI6MzAwLCJleHRyYSI6eyJuYW1lIjoiVVNEIENvaW4iLCJ2ZXJzaW9uIjoiMiJ9fX0='
+```
+Base64 decoded data
+```json
+ {
+  "x402Version": 2,
+  "payload": {
+    "authorization": {
+      "from": "0x34B7FE106891a07528b4F2e5E339C32DA13cF510",
+      "to": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+      "value": "1000",
+      "validAfter": "1766479451",
+      "validBefore": "1766480351",
+      "nonce": "0x99f78d4dec129909cfc60d8da29a4a084720cffad8b59ee69849b1560b09fd7c"
+    },
+    "signature": "0x0953185bb3a3d09e7b3c8c005cc8654d8301d510ca0057550c0376adc2007c30037db5c52526bc450c6278677e0e983a94992fdee2f8fed29630846e0ddc92e41c",
+    "resource": {
+      "url": "http://localhost:4021/weather",
+      "description": "Weather data",
+      "mimeType": "application/json"
+    },
+    "accepted": {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "amount": "1000",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+      "maxTimeoutSeconds": 300,
+      "extra": {
+        "name": "USD Coin",
+        "version": "2"
+      }
+    }
+  }
 }
 ```
-#### Payment process
-1. **Initial Request**: Client makes standard HTTP request
-2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
-3. **Payment Selection**: Client SDK selects appropriate payment method
-4. **Signature creation and create payload**: This pre-authorization process consists of two steps
-     1. Pre-authorized credit limit and payment amount;
-     2. Utilize payload information and employ a contract to generate a signature.
-5. **Retry with Payment**: Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
-6. **Verification**: Server sends paymentPayload and paymentRequirements to facilitator for verification
-7. **Content Delivery**: Server processes request and returns content
-8. **Settlement**: Server settles paymentPayload and paymentRequirements on-chain via facilitator
-9. **Tx confirmed**: Submit transaction hash and remove transaction results
-10. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` body
-
-
-> Submit the payment paymentPayload and paymentRequirements object, and let the facilitator complete the verification and settlement.
+### Second Response  body
+```json
+{
+  success: true,
+  transaction: '0x685a5b37f8e9affae5787ee7dfeaab20e0b4e2a8c3197020299b1c0163ef0c74',
+  network: 'eip155:8453',
+  payer: '0x34B7FE106891a07528b4F2e5E339C32DA13cF510',
+  requirements: {
+    scheme: 'exact',
+    network: 'eip155:8453',
+    amount: '1000',
+    asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+    payTo: '0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628',
+    maxTimeoutSeconds: 300,
+    extra: { name: 'USD Coin', version: '2' }
+  }
+}
+```
 
 ---
 
@@ -350,15 +395,14 @@ For EVM-compatible networks, payment requirements specify:
 ```typescript
 {
     "scheme": "exact",
-        "network": "eip155:56",
-        "networkId": "56",
-        "amount": "10000",
-        "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
-        "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
-        "maxTimeoutSeconds": 300,
-        "extra": {
+    "network": "eip155:56",
+    "amount": "10000",
+    "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+    "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
+    "maxTimeoutSeconds": 300,
+    "extra": {
         "name": "USDT",
-            "version": "1"
+        "version": "2"
     }
 }
 ```
@@ -370,12 +414,11 @@ For EVM-compatible networks, payment requirements specify:
 |--------------------|---|---|---------------------------------------------------------------------|--------------------------------------------|
 | scheme             |string|Yes| Payment scheme type, fixed as `exact`                               | exact                                      |
 | network            |string|Yes| Blockchain network (e.g., 56 corresponds to Binance Smart Chain)    | eip155:56                                  |
-| networkId          |string|Yes| Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain) | 56                                         |
 | amount             |string|Yes| Payment amount value                                                | 10000                                      |
 | asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
 | payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
 | maxTimeoutSeconds  |number|Yes| Payment timeout period (unit: seconds)                              | 300                                        |
-| extra              |object|Yes| Additional supplementary information related to payment             | {"name":"USDT","version":"1"}              |
+| extra              |object|Yes| Additional supplementary information related to payment             | {"name":"USDT","version":"2"}              |
 
 ---
 
@@ -494,213 +537,6 @@ When payment verification fails, the response includes an `invalidReason`:
 
 
 
-### Token Addresses
-
-For ERC-20 tokens, use the token contract address.
-
----
-
-## Code Examples
-
-**Client:**
-```typescript
-import {config} from "dotenv";
-import {wrapFetchWithPayment, x402Client, x402HTTPClient} from "@x402/fetch";
-import {registerExactEvmScheme} from "@x402/evm/exact/client";
-import {toClientEvmSigner} from "@x402/evm";
-import {privateKeyToAccount} from "viem/accounts";
-import {createWalletClient, http, publicActions} from "viem";
-import {xLayer} from "viem/chains";
-
-config();
-
-const evmPrivateKey = process.env.EVM_PRIVATE_KEY as `0x${string}`;
-const svmPrivateKey = process.env.SVM_PRIVATE_KEY as string;
-const baseURL = process.env.RESOURCE_SERVER_URL || "http://localhost:4021";
-const endpointPath = process.env.ENDPOINT_PATH || "/weather";
-const url = `${baseURL}${endpointPath}`;
-
-/**
- * Example demonstrating how to use @x402/fetch to make requests to x402-protected endpoints.
- *
- * This uses the helper registration functions from @x402/evm and @x402/svm to register
- * all supported networks for both v1 and v2 protocols.
- *
- * Required environment variables:
- * - EVM_PRIVATE_KEY: The private key of the EVM signer
- */
-async function main(): Promise<void> {
-    const evmAccount = privateKeyToAccount(evmPrivateKey);
-
-    const walletClient = createWalletClient({
-        account: evmAccount,
-        chain: xLayer,
-        transport: http(),
-    }).extend(publicActions);
-
-    const evmSigner = toClientEvmSigner({
-        address: evmAccount.address,
-        signTypedData: message => evmAccount.signTypedData(message as never),
-        readContract: args =>
-            walletClient.readContract({
-                ...args,
-                args: args.args || [],
-            } as never),
-        sendTransaction: args =>
-            walletClient.sendTransaction({
-                to: args.to,
-                data: args.data,
-            } as never),
-        waitForTransactionReceipt: (args: { hash: `0x${string}` }) =>
-            walletClient.waitForTransactionReceipt(args),
-    });
-
-    const client = new x402Client();
-    registerExactEvmScheme(client, { signer: evmSigner });
-
-    const fetchWithPayment = wrapFetchWithPayment(fetch, client);
-
-    console.log(`Making request to: ${url}\n`);
-    const response = await fetchWithPayment(url, { method: "GET" });
-    const body = await response.json();
-    console.log("Response body:", body);
-
-    if (response.ok) {
-        const paymentResponse = new x402HTTPClient(client).getPaymentSettleResponse(name =>
-            response.headers.get(name),
-        );
-        console.log("\nPayment response:", paymentResponse);
-    } else {
-        console.log(`\nNo payment settled (response status: ${response.status})`);
-    }
-}
-
-main().catch(error => {
-    console.error(error?.response?.data?.error ?? error);
-    process.exit(1);
-});
-
-```
-
-**Server:**
-```typescript
-import {config} from "dotenv";
-import {paymentMiddleware, x402ResourceServer} from "@x402/hono";
-import {ExactEvmScheme} from "@x402/evm/exact/server";
-import {HTTPFacilitatorClient} from "@x402/core/server";
-import {Hono} from "hono";
-import {serve} from "@hono/node-server";
-
-config();
-
-const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
-const svmAddress = process.env.SVM_ADDRESS;
-const apiKey = process.env.API_KEY as string;
-if (!evmAddress || !svmAddress) {
-    console.error("Missing required environment variables");
-    process.exit(1);
-}
-
-const facilitatorUrl = process.env.FACILITATOR_URL;
-if (!facilitatorUrl) {
-    console.error("❌ FACILITATOR_URL environment variable is required");
-    process.exit(1);
-}
-
-// 创建 facilitator client，如果提供了 API Key，则配置认证头
-const facilitatorClient = new HTTPFacilitatorClient({
-    url: facilitatorUrl,
-    createAuthHeaders: apiKey
-        ? async () => {
-            return {
-                verify: {
-                    Authorization: `Bearer ${apiKey}`,
-                },
-                settle: {
-                    Authorization: `Bearer ${apiKey}`,
-                },
-                supported: {
-                    Authorization: `Bearer ${apiKey}`,
-                },
-            };
-        }
-        : undefined,
-});
-
-const app = new Hono();
-
-app.use(
-    paymentMiddleware(
-        {
-            "GET /weather": {
-                accepts: [
-                    {
-                        scheme: "exact",
-                        price: "$0.001",
-                        network: "eip155:196",
-                        payTo: evmAddress,
-                    },
-                    // {
-                    //   scheme: "exact",
-                    //   price: "$0.001",
-                    //   network: "eip155:56",
-                    //   payTo: evmAddress,
-                    // },
-                    // {
-                    //   scheme: "exact",
-                    //   price: "$0.001",
-                    //   network: "eip155:8453",
-                    //   payTo: evmAddress,
-                    // }
-                ],
-                description: "Weather data",
-                mimeType: "application/json",
-            },
-        },
-        new x402ResourceServer(facilitatorClient)
-            .register("eip155:196", new ExactEvmScheme())
-            .register("eip155:56", new ExactEvmScheme())
-            .register("eip155:8453", new ExactEvmScheme())
-    ),
-);
-
-app.get("/weather", c => {
-    return c.json({
-        report: {
-            weather: "sunny",
-            temperature: 70,
-        },
-    });
-});
-
-serve({
-    fetch: app.fetch,
-    port: 4021,
-});
-
-console.log(`Server listening at http://localhost:4021`);
-
-```
-
-###  Environment Configuration
-
-**Server `.env`:**
-```bash
-EVM_ADDRESS=0x2EC8A3D26b720c7a2B16f582d883F7980EEA3628
-SVM_ADDRESS=53KCTzCNQYNyp84bQD84F2gac2ioPU7AGLm76JmoLpWE
-FACILITATOR_URL=http://localhost:3001
-API_KEY=4556
-```
-
-**Client `.env`:**
-```bash
-EVM_PRIVATE_KEY=0xYourPrivateKeyHere
-SVM_PRIVATE_KEY=0xYourPrivateKeyHere
-RESOURCE_SERVER_URL=http://localhost:4021
-ENDPOINT_PATH=/weather
-PRIVATE_KEY=0xYourPrivateKeyHere
-```
-
 ---
 
 ## Best Practices
@@ -738,7 +574,7 @@ PRIVATE_KEY=0xYourPrivateKeyHere
 **Cause:** Signature doesn't match payment requirements
 
 **Solution:**
-- Verify wallet client chain matches `networkId`
+- Verify wallet client chain matches `network`
 - Check `validAfter` and `validBefore` timestamps
 - Ensure `from`, `to`, and `value` match requirements
 
@@ -772,18 +608,6 @@ PRIVATE_KEY=0xYourPrivateKeyHere
 
 ---
 
-## API Reference Summary
-
-### Core Types
-
-| Type | Purpose |
-|------|---------|
-| `PaymentRequirement` | Defines payment requirements |
-| `EvmPaymentPayload` | Payment payload structure |
-| `SettleResponse` | Payment settlement result |
-| `VerifyResponse` | Payment verification result |
-
----
 
 ## Support & Resources
 

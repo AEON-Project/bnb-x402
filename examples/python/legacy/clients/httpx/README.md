@@ -12,7 +12,7 @@ cp .env-local .env
 
 2. Install dependencies:
 ```bash
-uv sync --python 3.11
+uv sync --python 3.10
 ```
 
 3. Run one of the examples:
