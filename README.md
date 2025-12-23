@@ -1,8 +1,8 @@
 # x402 Protocol API Documentation
 ## BNB Chain AEON Facilitator Implementation
 
-Version: 1.0
-Last Updated: October 2025
+Version: 2.0
+Last Updated: December 2025
 
 ---
 
@@ -228,121 +228,6 @@ Pre-authorized payment signature that the facilitator can execute.
 
 > Submit the payment paymentPayload and paymentRequirements object, and let the facilitator complete the verification and settlement.
 
-
----
-
-## Server API Reference
-
-### Middleware Configuration
-
-#### `paymentMiddleware(routeConfig, facilitatorConfig)`
-
-Hono middleware that protects routes with payment requirements.
-
-**Parameters:**
-
-- `routeConfig`: `RoutesConfig` - Map of routes to payment requirements
-- `facilitatorConfig`: `FacilitatorConfig` - Facilitator service configuration
-
-**Returns:** Hono middleware function
-
-**Example:**
-
-```typescript
-import { config } from "dotenv";
-import { paymentMiddleware, x402ResourceServer } from "@x402/hono";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { HTTPFacilitatorClient } from "@x402/core/server";
-import { Hono } from "hono";
-import { serve } from "@hono/node-server";
-config();
-
-const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
-const svmAddress = process.env.SVM_ADDRESS;
-const apiKey = process.env.API_KEY as string;
-if (!evmAddress || !svmAddress) {
-    console.error("Missing required environment variables");
-    process.exit(1);
-}
-
-const facilitatorUrl = process.env.FACILITATOR_URL;
-if (!facilitatorUrl) {
-    console.error("❌ FACILITATOR_URL environment variable is required");
-    process.exit(1);
-}
-
-// 创建 facilitator client，如果提供了 API Key，则配置认证头
-const facilitatorClient = new HTTPFacilitatorClient({
-    url: facilitatorUrl,
-    createAuthHeaders: apiKey
-        ? async () => {
-            return {
-                verify: {
-                    Authorization: `Bearer ${apiKey}`,
-                },
-                settle: {
-                    Authorization: `Bearer ${apiKey}`,
-                },
-                supported: {
-                    Authorization: `Bearer ${apiKey}`,
-                },
-            };
-        }
-        : undefined,
-});
-
-const app = new Hono();
-
-app.use(
-    paymentMiddleware(
-        {
-            "GET /weather": {
-                accepts: [
-                    {
-                        scheme: "exact",
-                        price: "$0.001",
-                        network: "eip155:196",
-                        payTo: evmAddress,
-                    },
-                    // {
-                    //   scheme: "exact",
-                    //   price: "$0.001",
-                    //   network: "eip155:56",
-                    //   payTo: evmAddress,
-                    // },
-                    // {
-                    //   scheme: "exact",
-                    //   price: "$0.001",
-                    //   network: "eip155:8453",
-                    //   payTo: evmAddress,
-                    // }
-                ],
-                description: "Weather data",
-                mimeType: "application/json",
-            },
-        },
-        new x402ResourceServer(facilitatorClient)
-            .register("eip155:196", new ExactEvmScheme())
-            .register("eip155:56", new ExactEvmScheme())
-            .register("eip155:8453", new ExactEvmScheme())
-    ),
-);
-
-app.get("/weather", c => {
-    return c.json({
-        report: {
-            weather: "sunny",
-            temperature: 70,
-        },
-    });
-});
-
-serve({
-    fetch: app.fetch,
-    port: 4021,
-});
-```
-
 ---
 
 ## Payment Requirements
@@ -369,21 +254,17 @@ For EVM-compatible networks, payment requirements specify:
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `scheme` | `"exact"` | Yes | Payment scheme (only "exact" supported) |
-| `namespace` | `"evm"` | Yes | Blockchain namespace |
-| `tokenAddress` | `string` | Yes | Token contract address (use zero address for native) |
-| `amountRequired` | `number` \| `bigint` | Yes | Payment amount |
-| `amountRequiredFormat` | `"humanReadable"` \| `"smallestUnit"` | Yes | Amount format specification |
-| `payToAddress` | `string` | Yes | Recipient address |
-| `networkId` | `string` | Yes | Chain ID (e.g., "56" for BSC) |
-| `tokenDecimals` | `number` | No | Token decimals (usually 18) |
-| `tokenSymbol` | `string` | No | Token symbol (e.g., "USDT") |
-| `description` | `string` | No | Human-readable description |
-| `resource` | `string` | No | Resource identifier |
-| `estimatedProcessingTime` | `number` | No | Expected processing time (seconds) |
-| `requiredDeadlineSeconds` | `number` | No | Payment deadline |
+
+| Second-level Field |Type|Required| Description                                                         | Example Value                              |
+|--------------------|---|---|---------------------------------------------------------------------|--------------------------------------------|
+| scheme             |string|Yes| Payment scheme type, fixed as `exact`                               | exact                                      |
+| network            |string|Yes| Blockchain network (e.g., 56 corresponds to Binance Smart Chain)    | eip155:56                                  |
+| networkId          |string|Yes| Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain) | 56                                         |
+| amount             |string|Yes| Payment amount value                                                | 10000                                      |
+| asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
+| payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
+| maxTimeoutSeconds  |number|Yes| Payment timeout period (unit: seconds)                              | 300                                        |
+| extra              |object|Yes| Additional supplementary information related to payment             | {"name":"USDT","version":"1"}              |
 
 ---
 
@@ -430,18 +311,48 @@ Authorization: Bearer 123
 
 When payment verification fails, the response includes an `invalidReason`:
 
-| Reason | Description |
-|--------|-------------|
-| `insufficient_funds` | Payer has insufficient balance |
-| `invalid_exact_evm_payload_authorization_valid_after` | Authorization not yet valid |
-| `invalid_exact_evm_payload_authorization_valid_before` | Authorization expired |
-| `invalid_exact_evm_payload_authorization_value` | Incorrect payment amount |
-| `invalid_exact_evm_payload_signature` | Invalid signature |
-| `invalid_exact_evm_payload_recipient_mismatch` | Wrong recipient address |
-| `invalid_network` | Unsupported or wrong network |
-| `invalid_payload` | Malformed payment payload |
-| `invalid_scheme` | Unsupported payment scheme |
-| `invalid_x402_version` | Incompatible protocol version |
+| Reason                                                                                | Description |
+|---------------------------------------------------------------------------------------|-------------|
+| insufficient_funds                                                                    | The account does not have enough balance to complete the transaction |
+| invalid_exact_evm_payload_authorization_valid_after                                   | The `valid_after` timestamp in the EVM payload authorization is invalid |
+| invalid_exact_evm_payload_authorization_valid_before                                  | The `valid_before` timestamp in the EVM payload authorization is invalid |
+| invalid_exact_evm_payload_authorization_value                                         | The value specified in the EVM payload authorization is invalid |
+| invalid_exact_evm_payload_signature                                                   | The signature of the exact EVM payload is invalid or does not match |
+| invalid_exact_evm_payload_undeployed_smart_wallet                                     | The smart wallet referenced in the EVM payload has not been deployed yet |
+| invalid_exact_evm_payload_recipient_mismatch                                          | The recipient address in the EVM payload does not match the expected value |
+| invalid_exact_svm_payload_transaction                                                 | The exact SVM payload transaction is malformed or invalid |
+| invalid_exact_svm_payload_transaction_amount_mismatch                                 | The transaction amount in the SVM payload does not match the required amount |
+| invalid_exact_svm_payload_transaction_create_ata_instruction                          | The Create Associated Token Account (ATA) instruction in the SVM payload is invalid |
+| invalid_exact_svm_payload_transaction_create_ata_instruction_incorrect_payee          | The payee address in the Create ATA instruction of the SVM payload is incorrect |
+| invalid_exact_svm_payload_transaction_create_ata_instruction_incorrect_asset          | The asset type in the Create ATA instruction of the SVM payload is incorrect |
+| invalid_exact_svm_payload_transaction_instructions                                    | The instructions included in the SVM payload transaction are invalid |
+| invalid_exact_svm_payload_transaction_instructions_length                             | The length of the instructions list in the SVM payload transaction is invalid |
+| invalid_exact_svm_payload_transaction_instructions_compute_limit_instruction          | The compute limit instruction in the SVM payload transaction is invalid |
+| invalid_exact_svm_payload_transaction_instructions_compute_price_instruction          | The compute price instruction in the SVM payload transaction is invalid |
+| invalid_exact_svm_payload_transaction_instructions_compute_price_instruction_too_high | The compute price specified in the SVM payload transaction instruction is too high |
+| invalid_exact_svm_payload_transaction_instruction_not_spl_token_transfer_checked      | The instruction in the SVM payload is not a valid SPL Token TransferChecked instruction |
+| invalid_exact_svm_payload_transaction_instruction_not_token_2022_transfer_checked     | The instruction in the SVM payload is not a valid Token 2022 TransferChecked instruction |
+| invalid_exact_svm_payload_transaction_fee_payer_included_in_instruction_accounts      | The fee payer address is incorrectly included in the instruction accounts list of the SVM payload transaction |
+| invalid_exact_svm_payload_transaction_fee_payer_transferring_funds                    | The fee payer is attempting to transfer funds in the SVM payload transaction, which is not allowed |
+| invalid_exact_svm_payload_transaction_not_a_transfer_instruction                      | The instruction in the SVM payload transaction is not a valid token transfer instruction |
+| invalid_exact_svm_payload_transaction_receiver_ata_not_found                          | The Associated Token Account (ATA) for the receiver does not exist |
+| invalid_exact_svm_payload_transaction_sender_ata_not_found                            | The Associated Token Account (ATA) for the sender does not exist |
+| invalid_exact_svm_payload_transaction_simulation_failed                               | Simulation of the SVM payload transaction failed before execution |
+| invalid_exact_svm_payload_transaction_transfer_to_incorrect_ata                       | The token transfer in the SVM payload is directed to an incorrect Associated Token Account (ATA) |
+| invalid_network                                                                       | The network specified for the transaction is invalid or unsupported |
+| invalid_payload                                                                       | The transaction payload is malformed, incomplete, or otherwise invalid |
+| invalid_payment_requirements                                                          | The payment requirements defined in the transaction are invalid |
+| invalid_scheme                                                                        | The payment or transaction scheme specified is invalid |
+| invalid_payment                                                                       | The payment details provided are invalid or cannot be processed |
+| payment_expired                                                                       | The payment has expired and can no longer be processed |
+| unsupported_scheme                                                                    | The payment or transaction scheme specified is not supported |
+| invalid_x402_version                                                                  | The X402 protocol version specified is invalid |
+| invalid_transaction_state                                                             | The current state of the transaction is invalid for the requested operation |
+| settle_exact_svm_block_height_exceeded                                                | The block height limit for settling the SVM transaction has been exceeded |
+| settle_exact_svm_transaction_confirmation_timed_out                                   | The confirmation process for the SVM transaction has timed out |
+| unexpected_settle_error                                                               | An unexpected error occurred while attempting to settle the transaction |
+| unexpected_verify_error                                                               | An unexpected error occurred while attempting to verify the transaction or payload |
+
 
 ### Error Response Example
 
@@ -774,6 +685,6 @@ This implementation follows the x402 protocol specification. See individual pack
 
 ---
 
-**Last Updated:** October 2025
-**Protocol Version:** x402 V0.0.1
-**Implementation Version:** 0.0.22
+**Last Updated:** December 2025
+**Protocol Version:** x402 V2.0
+
