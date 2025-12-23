@@ -175,6 +175,109 @@ serve({
 
 console.log(`Server listening at http://localhost:4021`);
 ```
+
+
+### Quick Start - Client
+
+```typescript
+import { config } from "dotenv";
+import { x402Client, wrapFetchWithPayment, x402HTTPClient } from "@x402/fetch";
+import { registerExactEvmScheme } from "@x402/evm/exact/client";
+import { registerExactSvmScheme } from "@x402/svm/exact/client";
+import { toClientEvmSigner } from "@x402/evm";
+import { privateKeyToAccount } from "viem/accounts";
+import { createPublicClient, createWalletClient, http, publicActions } from "viem";
+import { bsc, xLayer, base } from "viem/chains";
+
+config();
+
+const evmPrivateKey = process.env.EVM_PRIVATE_KEY as `0x${string}`;
+const baseURL = process.env.RESOURCE_SERVER_URL || "http://localhost:4021";
+const endpointPath = process.env.ENDPOINT_PATH || "/weather";
+const url = `${baseURL}${endpointPath}`;
+
+/**
+ * Example demonstrating how to use @x402/fetch to make requests to x402-protected endpoints.
+ *
+ * This uses the helper registration functions from @x402/evm and @x402/svm to register
+ * all supported networks for both v1 and v2 protocols.
+ *
+ * Required environment variables:
+ * - EVM_PRIVATE_KEY: The private key of the EVM signer
+ */
+async function main(): Promise<void> {
+  const evmAccount = privateKeyToAccount(evmPrivateKey);
+
+  const walletClient = createWalletClient({
+    account: evmAccount,
+    chain: xLayer,
+    transport: http(),
+  }).extend(publicActions);
+
+  const evmSigner = toClientEvmSigner({
+    address: evmAccount.address,
+    signTypedData: message => evmAccount.signTypedData(message as never),
+    readContract: args =>
+      walletClient.readContract({
+        ...args,
+        args: args.args || [],
+      } as never),
+    sendTransaction: args =>
+      walletClient.sendTransaction({
+        to: args.to,
+        data: args.data,
+      } as never),
+    waitForTransactionReceipt: (args: { hash: `0x${string}` }) =>
+      walletClient.waitForTransactionReceipt(args),
+  });
+
+  const client = new x402Client();
+  registerExactEvmScheme(client, { signer: evmSigner });
+
+  const fetchWithPayment = wrapFetchWithPayment(fetch, client);
+
+  console.log(`Making request to: ${url}\n`);
+  const response = await fetchWithPayment(url, { method: "GET" });
+  const body = await response.json();
+  console.log("Response body:", body);
+
+  if (response.ok) {
+    const paymentResponse = new x402HTTPClient(client).getPaymentSettleResponse(name =>
+      response.headers.get(name),
+    );
+    console.log("\nPayment response:", paymentResponse);
+  } else {
+    console.log(`\nNo payment settled (response status: ${response.status})`);
+  }
+}
+
+main().catch(error => {
+  console.error(error?.response?.data?.error ?? error);
+  process.exit(1);
+});
+
+```
+
+
+###  Environment Configuration
+
+**Server `.env`:**
+```bash
+EVM_ADDRESS=0x2EC8A3D26b720c7a2B16f582d883F7980EEA3628
+SVM_ADDRESS=53KCTzCNQYNyp84bQD84F2gac2ioPU7AGLm76JmoLpWE
+FACILITATOR_URL=http://localhost:3001
+API_KEY=4556
+```
+
+**Client `.env`:**
+```bash
+EVM_PRIVATE_KEY=0xYourPrivateKeyHere
+SVM_PRIVATE_KEY=0xYourPrivateKeyHere
+RESOURCE_SERVER_URL=http://localhost:4021
+ENDPOINT_PATH=/weather
+PRIVATE_KEY=0xYourPrivateKeyHere
+```
+### Use client request server
 ### First Request 
 ```json
 curl --location 'http://localhost:4021/weather'
@@ -273,106 +376,6 @@ Base64 decoded data
     extra: { name: 'USD Coin', version: '2' }
   }
 }
-```
-
-### Quick Start - Client
-
-```typescript
-import { config } from "dotenv";
-import { x402Client, wrapFetchWithPayment, x402HTTPClient } from "@x402/fetch";
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { registerExactSvmScheme } from "@x402/svm/exact/client";
-import { toClientEvmSigner } from "@x402/evm";
-import { privateKeyToAccount } from "viem/accounts";
-import { createPublicClient, createWalletClient, http, publicActions } from "viem";
-import { bsc, xLayer, base } from "viem/chains";
-
-config();
-
-const evmPrivateKey = process.env.EVM_PRIVATE_KEY as `0x${string}`;
-const baseURL = process.env.RESOURCE_SERVER_URL || "http://localhost:4021";
-const endpointPath = process.env.ENDPOINT_PATH || "/weather";
-const url = `${baseURL}${endpointPath}`;
-
-/**
- * Example demonstrating how to use @x402/fetch to make requests to x402-protected endpoints.
- *
- * This uses the helper registration functions from @x402/evm and @x402/svm to register
- * all supported networks for both v1 and v2 protocols.
- *
- * Required environment variables:
- * - EVM_PRIVATE_KEY: The private key of the EVM signer
- */
-async function main(): Promise<void> {
-  const evmAccount = privateKeyToAccount(evmPrivateKey);
-
-  const walletClient = createWalletClient({
-    account: evmAccount,
-    chain: xLayer,
-    transport: http(),
-  }).extend(publicActions);
-
-  const evmSigner = toClientEvmSigner({
-    address: evmAccount.address,
-    signTypedData: message => evmAccount.signTypedData(message as never),
-    readContract: args =>
-      walletClient.readContract({
-        ...args,
-        args: args.args || [],
-      } as never),
-    sendTransaction: args =>
-      walletClient.sendTransaction({
-        to: args.to,
-        data: args.data,
-      } as never),
-    waitForTransactionReceipt: (args: { hash: `0x${string}` }) =>
-      walletClient.waitForTransactionReceipt(args),
-  });
-
-  const client = new x402Client();
-  registerExactEvmScheme(client, { signer: evmSigner });
-
-  const fetchWithPayment = wrapFetchWithPayment(fetch, client);
-
-  console.log(`Making request to: ${url}\n`);
-  const response = await fetchWithPayment(url, { method: "GET" });
-  const body = await response.json();
-  console.log("Response body:", body);
-
-  if (response.ok) {
-    const paymentResponse = new x402HTTPClient(client).getPaymentSettleResponse(name =>
-      response.headers.get(name),
-    );
-    console.log("\nPayment response:", paymentResponse);
-  } else {
-    console.log(`\nNo payment settled (response status: ${response.status})`);
-  }
-}
-
-main().catch(error => {
-  console.error(error?.response?.data?.error ?? error);
-  process.exit(1);
-});
-
-```
-
-###  Environment Configuration
-
-**Server `.env`:**
-```bash
-EVM_ADDRESS=0x2EC8A3D26b720c7a2B16f582d883F7980EEA3628
-SVM_ADDRESS=53KCTzCNQYNyp84bQD84F2gac2ioPU7AGLm76JmoLpWE
-FACILITATOR_URL=http://localhost:3001
-API_KEY=4556
-```
-
-**Client `.env`:**
-```bash
-EVM_PRIVATE_KEY=0xYourPrivateKeyHere
-SVM_PRIVATE_KEY=0xYourPrivateKeyHere
-RESOURCE_SERVER_URL=http://localhost:4021
-ENDPOINT_PATH=/weather
-PRIVATE_KEY=0xYourPrivateKeyHere
 ```
 
 ---
