@@ -488,7 +488,9 @@ When payment verification fails, the response includes an `invalidReason`:
 | BSC     | 56       | USDC: `0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d`  |
 | BSC     | 56       | TESTU: `0x6e3BCf81d331fa7Bd79Ac2642486c70BEAE2600E` |
 | BASE    | 8453     | USDC: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`  |
+| BASE    | 8453     | USDT: `0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2`  |
 | X Layer | 196      | USDT: `0x779ded0c9e1022225f8e0630b35a9b54be713736`  |
+| X Layer | 196      | USDC: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`  |
 
 
 
