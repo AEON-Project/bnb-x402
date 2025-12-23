@@ -38,15 +38,15 @@ The BNB x402 protocol enables HTTP-native blockchain payments for API access. Th
 2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
 3. **Payment Selection**: Client SDK selects appropriate payment method,like bsc chain.
 4. **Signature creation and create payload**: 
-     1. Pre-authorized credit limit and payment amount;
+     1. Pre-authorized credit limit and payment amount.
      2. Utilize payload information and employ a contract to generate a signature.
-5. **Verification**: The server uses the 'PAYMENT-SIGNATURE' and 'PAYMENT-REQUIRED' interfaces to communicate with the facilitator/verify interface
-6. **Get/verify result**: Get the facilitator/verify interface response
-7. **Settlement**: If verify is OK, Client send request  with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED` to facilitator for settle
-8. **Submit tx**: If settle is complete,Submit transaction hash .
-9. **Tx confirmed**: Return the confirmed result of tx
-10. **Facilitator Response**: The server received a "200 OK" message with transaction details and response body containing tx_hash
-11. **Server Response**: If facilitator reponse status is settled,Client receives `200 OK` with response body
+5. **Verification**: The server uses the 'PAYMENT-SIGNATURE' and 'PAYMENT-REQUIRED' interfaces to communicate with the facilitator `/verify` interface.
+6. **Get/verify result**: Get the facilitator `/verify` interface response
+7. **Settlement**: If verify is OK, Client send request  with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED` to facilitator for `settle`.
+8. **Submit tx**: If settle is complete,Submit transaction hash.
+9. **Tx confirmed**: Return the confirmed result of tx.
+10. **Facilitator Response**: The server received a "200 OK" message with transaction details and response body containing tx_hash.
+11. **Server Response**: If facilitator reponse status is settled,Client receives `200 OK` with response body.
 
 
 > Submit the payment paymentPayload and paymentRequirements object, and let the facilitator complete the verification and settlement.
