@@ -386,8 +386,6 @@ Base64 decoded data
 
 ---
 
----
-
 ## Payment Requirements
 
 ### EVM Networks
