@@ -10,12 +10,11 @@ Last Updated: December 2025
 
 1. [Overview](#overview)
 2. [Getting Started](#getting-started)
-3. [Authentication & Payment Flow](#authentication--payment-flow)
-4. [Server API Reference](#server-api-reference)
-5. [Payment Requirements](#payment-requirements)
-6. [HTTP Headers](#http-headers)
-7. [Error Handling](#error-handling)
-8. [Supported Networks](#supported-networks)
+3. [Server API Reference](#server-api-reference)
+4. [Payment Requirements](#payment-requirements)
+5. [HTTP Headers](#http-headers)
+6. [Error Handling](#error-handling)
+7. [Supported Networks](#supported-networks)
 
 ---
 
@@ -38,10 +37,30 @@ The BNB x402 protocol enables HTTP-native blockchain payments for API access. Th
 1.  Client Application makes GET request to /api
 2.  Server responds with 402 Payment Required and returns payment requirements
 3.  The Client SDK uses the wallet to sign payments, and this process includes both pre-authorization and signature.
-4.  Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
+4.  Use a request header with PAYMENT SIGNATURE to request the server
+5.  Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
 5.  Server sends payment to Facilitator for verification
 6.  Server processes request and settles payment
 7.  Server returns 200 OK with content to Client Application
+
+
+**Flow Description:**
+1. **Initial Request**: Client makes standard HTTP request
+2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
+3. **Payment Selection**: Client SDK selects appropriate payment method,like bsc chain.
+4. **Signature creation and create payload**: 
+     1. Pre-authorized credit limit and payment amount;
+     2. Utilize payload information and employ a contract to generate a signature.
+5. **Verification**: The server uses the 'PAYMENT-SIGNATURE' and 'PAYMENT-REQUIRED' interfaces to communicate with the facilitator/verify interface
+6. **Get/verify result**: Get the facilitator/verify interface response
+7. **Settlement**: If verify is OK, Client send request  with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED` to facilitator for settle
+8. **Submit tx**: If settle is complete,Submit transaction hash .
+9. **Tx confirmed**: Return the confirmed result of tx
+10. **Facilitator Response**: The server received a "200 OK" message with transaction details and response body containing tx_hash
+11. **Server Response**: If facilitator reponse status is settled,Client receives `200 OK` with response body
+
+
+> Submit the payment paymentPayload and paymentRequirements object, and let the facilitator complete the verification and settlement.
 
    
 ---
@@ -377,55 +396,6 @@ Base64 decoded data
 ```
 
 ---
-
-## Authentication & Payment Flow
-
-### Step-by-Step Flow
-
-
-
-### Payment Types
-
-The x402 protocol supports two payment types:
-
-#### 1.EIP3009 Authorization 
-
-Eip3009 will be executed by a facilitator
-please see [facilitator](./facilitator.md)
-
-
-#### Payment process
-1. **Initial Request**: Client makes standard HTTP request
-2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
-3. **Payment Selection**: Client SDK selects appropriate payment method
-4. **Signature creation and create payload**: The step of pre-authorization involves directly invoking the contract to sign using the payload information.
-5. **Retry with Payment**: Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
-6. **Verification**: Server sends paymentPayload and paymentRequirements to facilitator for verification
-7. **Content Delivery**: Server processes request and returns content
-8. **Settlement**: Server settles paymentPayload and paymentRequirements on-chain via facilitator
-9. **Tx confirmed**: Submit transaction hash and remove transaction results
-10. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` body
-  
-
-#### 2.ERC-20 Authorization 
-Pre-authorized payment signature that the facilitator can execute.
-
-#### Payment process
-1. **Initial Request**: Client makes standard HTTP request
-2. **Payment Required**: Server responds with `402 Payment Required` and payment requirements
-3. **Payment Selection**: Client SDK selects appropriate payment method
-4. **Signature creation and create payload**: This pre-authorization process consists of two steps
-     1. Pre-authorized credit limit and payment amount;
-     2. Utilize payload information and employ a contract to generate a signature.
-5. **Retry with Payment**: Client retries request with `PAYMENT-SIGNATURE` & `PAYMENT-REQUIRED`
-6. **Verification**: Server sends paymentPayload and paymentRequirements to facilitator for verification
-7. **Content Delivery**: Server processes request and returns content
-8. **Settlement**: Server settles paymentPayload and paymentRequirements on-chain via facilitator
-9. **Tx confirmed**: Submit transaction hash and remove transaction results
-10. **Response**: Client receives `200 OK` with `X-PAYMENT-RESPONSE` body
-
-
-> Submit the payment paymentPayload and paymentRequirements object, and let the facilitator complete the verification and settlement.
 
 ---
 
