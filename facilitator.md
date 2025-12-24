@@ -94,7 +94,6 @@ The request body is in JSON format, containing the following fields:
 |--------------------|---|---|---------------------------------------------------------------------|--------------------------------------------|
 | scheme             |string|Yes| Payment scheme type, fixed as `exact`                               | exact                                      |
 | network            |string|Yes| Blockchain network (e.g., 56 corresponds to Binance Smart Chain)    | eip155:56                                  |
-| networkId          |string|Yes| Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain) | 56                                         |
 | amount             |string|Yes| Payment amount value                                                | 10000                                      |
 | asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
 | payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
@@ -124,7 +123,6 @@ The request body is in JSON format, containing the following fields:
   "accepted": {
     "scheme": "exact",
     "network": "eip155:56",
-    "networkId": "56",
     "amount": "10000",
     "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
     "payTo": "0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628",
@@ -143,7 +141,6 @@ The request body is in JSON format, containing the following fields:
 |--------------------|---|---|---------------------------------------------------------------------|--------------------------------------------|
 | scheme             |string|Yes| Payment scheme type, fixed as `exact`                               | exact                                      |
 | network            |string|Yes| Blockchain network (e.g., 56 corresponds to Binance Smart Chain)    | eip155:56                                  |
-| networkId          |string|Yes| Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain) | 56                                         |
 | amount             |string|Yes| Payment amount value                                                | 10000                                      |
 | asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
 | payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
@@ -156,7 +153,6 @@ The request body is in JSON format, containing the following fields:
 {
 	"scheme": "exact",
 	"network": "eip155:56",
-	"networkId": "56",
 	"amount": "10000",
 	"asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
 	"payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
@@ -222,7 +218,6 @@ curl --location '[Base URL]/verify' \
         "accepted": {
             "scheme": "exact",
             "network": "eip155:56",
-            "networkId": "56",
             "amount": "10000",
             "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
             "payTo": "0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628",
@@ -236,7 +231,6 @@ curl --location '[Base URL]/verify' \
     "paymentRequirements": {
         "scheme": "exact",
         "network": "eip155:56",
-        "networkId": "56",
         "amount": "10000",
         "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
         "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
@@ -323,7 +317,6 @@ The request body is in JSON format, containing the `verifyId` returned by the `v
 |--------------------|---|---|---------------------------------------------------------------------|--------------------------------------------|
 | scheme             |string|Yes| Payment scheme type, fixed as `exact`                               | exact                                      |
 | network            |string|Yes| Blockchain network (e.g., 56 corresponds to Binance Smart Chain)    | eip155:56                                  |
-| networkId          |string|Yes| Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain) | 56                                         |
 | amount             |string|Yes| Payment amount value                                                | 10000                                      |
 | asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
 | payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
@@ -353,7 +346,6 @@ The request body is in JSON format, containing the `verifyId` returned by the `v
   "accepted": {
     "scheme": "exact",
     "network": "eip155:56",
-    "networkId": "56",
     "amount": "10000",
     "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
     "payTo": "0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628",
@@ -372,7 +364,6 @@ The request body is in JSON format, containing the `verifyId` returned by the `v
 |--------------------|---|---|---------------------------------------------------------------------|--------------------------------------------|
 | scheme             |string|Yes| Payment scheme type, fixed as `exact`                               | exact                                      |
 | network            |string|Yes| Blockchain network (e.g., 56 corresponds to Binance Smart Chain)    | eip155:56                                  |
-| networkId          |string|Yes| Blockchain network ID (e.g., 56 corresponds to Binance Smart Chain) | 56                                         |
 | amount             |string|Yes| Payment amount value                                                | 10000                                      |
 | asset              |string|Yes| Token contract address                                              | 0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628 |
 | payTo              |string|Yes| Payment target address           | 0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628              |
@@ -385,7 +376,6 @@ The request body is in JSON format, containing the `verifyId` returned by the `v
 {
 	"scheme": "exact",
 	"network": "eip155:56",
-	"networkId": "56",
 	"amount": "10000",
 	"asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
 	"payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",
@@ -451,7 +441,6 @@ curl --location '[Base URL]/settle' \
         "accepted": {
             "scheme": "exact",
             "network": "eip155:56",
-            "networkId": "56",
             "amount": "10000",
             "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
             "payTo": "0x2EC8A3D26b720c7a2B16f582d883F722bEEA3628",
@@ -465,7 +454,6 @@ curl --location '[Base URL]/settle' \
     "paymentRequirements": {
         "scheme": "exact",
         "network": "eip155:56",
-        "networkId": "56",
         "amount": "10000",
         "asset": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
         "payTo": "0x2EC8A3D26b720c7a2B16f582d883F798bEEA3628",

@@ -17,7 +17,7 @@ cp .env-local .env
 
 2. Install dependencies:
 ```bash
-uv sync
+uv sync --python 3.10
 ```
 
 3. Run the server:

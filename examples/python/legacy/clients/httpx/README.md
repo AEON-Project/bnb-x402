@@ -12,16 +12,13 @@ cp .env-local .env
 
 2. Install dependencies:
 ```bash
-uv sync
+uv sync --python 3.10
 ```
 
 3. Run one of the examples:
 ```bash
 # Simple approach
 uv run python main.py
-
-# Extensible approach
-uv run python extensible.py
 ```
 
 ## Two Integration Approaches

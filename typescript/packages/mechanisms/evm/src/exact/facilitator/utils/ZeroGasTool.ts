@@ -20,11 +20,10 @@ export class ZeroGasTool {
   constructor() {
     // 初始化配置
     this.sponsorUrl =
-      "https://open-platform-ap.nodereal.io/ff9f62ee2cb64a68aafb75836ec73e19/megafuel/56";
-    this.policyUUID = "c2f0ab27-0f74-4c8b-bcc1-1384e1ca8eb1";
+      "https://open-platform-ap.nodereal.io/*******/megafuel/56";
+    this.policyUUID = "**************";
     this.evmPrivateKey = process.env.EVM_PRIVATE_KEY as string;
     this.tokenContractAddress = "0x555e3311a9893c9b17444c1ff0d88192a57ef13e";
-    // this.tokenContractAddress = "0x55d398326f99059ff775485246999027b3197955";
 
     // 初始化钱包和Paymaster客户端
     this.wallet = new ethers.Wallet(this.evmPrivateKey);

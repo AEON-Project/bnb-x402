@@ -36,7 +36,7 @@ def custom_payment_selector(
     # Filter by base-sepolia network (testnet)
     return x402Client.default_payment_requirements_selector(
         accepts,
-        network_filter="xlayer",
+        network_filter="xLayer",
         scheme_filter=scheme_filter,
         max_value=max_value,
     )
