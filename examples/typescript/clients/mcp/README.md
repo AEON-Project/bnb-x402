@@ -41,7 +41,6 @@ cp .env-local .env
       ],
       "env": {
         "EVM_PRIVATE_KEY": "<private key of a wallet with USDC on Base Sepolia>",
-        "SVM_PRIVATE_KEY": "<base58-encoded private key of a Solana wallet with USDC on Devnet>",
         "RESOURCE_SERVER_URL": "http://localhost:4021",
         "ENDPOINT_PATH": "/weather"
       }
