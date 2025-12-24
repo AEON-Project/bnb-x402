@@ -1156,6 +1156,64 @@ importers:
         specifier: ^3.0.5
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.3)(jsdom@26.1.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(tsx@4.21.0)(yaml@2.8.2)
 
+  clients/axios:
+    dependencies:
+      '@scure/base':
+        specifier: ^1.2.6
+        version: 1.2.6
+      '@solana/kit':
+        specifier: ^2.1.1
+        version: 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(ws@8.18.3(bufferutil@4.1.0)(utf-8-validate@5.0.10))
+      '@x402/axios':
+        specifier: workspace:*
+        version: link:../../../../typescript/packages/http/axios
+      '@x402/evm':
+        specifier: workspace:*
+        version: link:../../../../typescript/packages/mechanisms/evm
+      '@x402/svm':
+        specifier: workspace:*
+        version: link:../../../../typescript/packages/mechanisms/svm
+      axios:
+        specifier: ^1.13.2
+        version: 1.13.2
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
+      viem:
+        specifier: ^2.39.0
+        version: 2.43.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.24.0
+        version: 9.39.2
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.29.1
+        version: 8.50.0(@typescript-eslint/parser@8.50.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(typescript@5.9.3)
+      '@typescript-eslint/parser':
+        specifier: ^8.29.1
+        version: 8.50.0(eslint@9.39.2)(typescript@5.9.3)
+      eslint:
+        specifier: ^9.24.0
+        version: 9.39.2
+      eslint-plugin-import:
+        specifier: ^2.31.0
+        version: 2.32.0(@typescript-eslint/parser@8.50.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)
+      eslint-plugin-jsdoc:
+        specifier: ^50.6.9
+        version: 50.8.0(eslint@9.39.2)
+      eslint-plugin-prettier:
+        specifier: ^5.2.6
+        version: 5.5.4(eslint@9.39.2)(prettier@3.5.2)
+      prettier:
+        specifier: 3.5.2
+        version: 3.5.2
+      tsx:
+        specifier: ^4.7.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+
   clients/fetch:
     dependencies:
       '@scure/base':
@@ -8026,7 +8084,7 @@ snapshots:
 
   '@scure/bip32@1.7.0':
     dependencies:
-      '@noble/curves': 1.9.1
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
 
@@ -12445,11 +12503,11 @@ snapshots:
   ox@0.6.7(typescript@5.9.3)(zod@3.25.76):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
-      '@noble/curves': 1.8.1
-      '@noble/hashes': 1.7.1
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.9.3)(zod@3.25.76)
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.2.3(typescript@5.9.3)(zod@3.25.76)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.9.3

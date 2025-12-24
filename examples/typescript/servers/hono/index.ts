@@ -47,18 +47,18 @@ app.use(
     {
       "GET /weather": {
         accepts: [
-          {
-            scheme: "exact",
-            price: "$0.001",
-            network: "eip155:196",
-            payTo: evmAddress,
-          },
           // {
           //   scheme: "exact",
           //   price: "$0.001",
-          //   network: "eip155:56",
+          //   network: "eip155:196",
           //   payTo: evmAddress,
           // },
+          {
+            scheme: "exact",
+            price: "$0.001",
+            network: "eip155:56",
+            payTo: evmAddress,
+          },
           // {
           //   scheme: "exact",
           //   price: "$0.001",

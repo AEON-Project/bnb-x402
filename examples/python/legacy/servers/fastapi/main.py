@@ -50,29 +50,29 @@ app.middleware("http")(
         #         eip712=EIP712Domain(name="USD Coin", version="2"),
         #     ),
         # ),
-        # price=TokenAmount(
-        #     amount="1000",
-        #     asset=TokenAsset(
-        #         address="0x55d398326f99059fF775485246999027B3197955",
-        #         decimals=18,
-        #         eip712=EIP712Domain(name="USDT", version="1"),
-        #     ),
-        # ),
-        # network="bsc",
         price=TokenAmount(
             amount="1000",
-            # asset=TokenAsset(
-            #     address="0x74b7f16337b8972027f6196a17a631ac6de26d22",
-            #     decimals=6,
-            #     eip712=EIP712Domain(name="USD Coin", version="2"),
-            # ),
             asset=TokenAsset(
-                address="0x779ded0c9e1022225f8e0630b35a9b54be713736",
-                decimals=6,
+                address="0x55d398326f99059fF775485246999027B3197955",
+                decimals=18,
                 eip712=EIP712Domain(name="USDT", version="1"),
             ),
         ),
-        network="xLayer",
+        network="bsc",
+        # price=TokenAmount(
+        #     amount="1000",
+        #     # asset=TokenAsset(
+        #     #     address="0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        #     #     decimals=6,
+        #     #     eip712=EIP712Domain(name="USD Coin", version="2"),
+        #     # ),
+        #     asset=TokenAsset(
+        #         address="0x779ded0c9e1022225f8e0630b35a9b54be713736",
+        #         decimals=6,
+        #         eip712=EIP712Domain(name="USDT", version="1"),
+        #     ),
+        # ),
+        # network="xLayer",
     )
 )
 

@@ -1,7 +1,6 @@
 import { config } from "dotenv";
 import { x402Client, wrapFetchWithPayment, x402HTTPClient } from "@x402/fetch";
 import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { registerExactSvmScheme } from "@x402/svm/exact/client";
 import { toClientEvmSigner } from "@x402/evm";
 import { privateKeyToAccount } from "viem/accounts";
 import { createPublicClient, createWalletClient, http, publicActions } from "viem";
@@ -30,7 +29,7 @@ async function main(): Promise<void> {
 
   const walletClient = createWalletClient({
     account: evmAccount,
-    chain: xLayer,
+    chain: bsc,
     transport: http(),
   }).extend(publicActions);
 
