@@ -11,6 +11,8 @@ load_dotenv()
 
 # Get configuration from environment
 ADDRESS = os.getenv("ADDRESS")
+FACILITATOR_URL = os.getenv("FACILITATOR_URL")
+API_KEY = os.getenv("API_KEY")
 
 if not ADDRESS:
     raise ValueError("Missing required environment variables")
@@ -22,7 +24,7 @@ app.middleware("http")(
     require_payment(
         path="/weather",
         pay_to_address=ADDRESS,
-        facilitator_config={"url": "https://facilitator-test.aeon.xyz"},
+        facilitator_config={"url": FACILITATOR_URL,"apiKey": API_KEY},
         # price=TokenAmount(
         #     amount="1000",
         #     asset=TokenAsset(

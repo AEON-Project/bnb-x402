@@ -23,6 +23,7 @@ class FacilitatorConfig(TypedDict, total=False):
     """
 
     url: str
+    apiKey: str
     create_headers: Callable[[], dict[str, dict[str, str]]]
     timeout: Any
 
@@ -38,10 +39,9 @@ class FacilitatorClient:
             raise ValueError(f"Invalid URL {url}, must start with http:// or https://")
         if url.endswith("/"):
             url = url[:-1]
-
         self.config = {
             "url": url,
-            "create_headers": config.get("create_headers"),
+            "apiKey": config.get("apiKey"),
             "timeout": config.get("timeout", 60.0),
         }
 
@@ -49,12 +49,11 @@ class FacilitatorClient:
             self, payment: PaymentPayload, payment_requirements: PaymentRequirements
     ) -> VerifyResponse:
         """Verify a payment header is valid and a request should be processed"""
-        headers = {"Content-Type": "application/json"}
-
+        apikey = self.config.get("apiKey")
+        headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+apikey }
         if self.config.get("create_headers"):
             custom_headers = await self.config["create_headers"]()
             headers.update(custom_headers.get("verify", {}))
-
         async with httpx.AsyncClient(timeout=self.config["timeout"]) as client:
             response = await client.post(
                 f"{self.config['url']}/verify",
@@ -75,12 +74,11 @@ class FacilitatorClient:
     async def settle(
             self, payment: PaymentPayload, payment_requirements: PaymentRequirements
     ) -> SettleResponse:
-        headers = {"Content-Type": "application/json"}
-
+        apikey = self.config.get("apiKey")
+        headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+apikey }
         if self.config.get("create_headers"):
             custom_headers = await self.config["create_headers"]()
             headers.update(custom_headers.get("settle", {}))
-
         async with httpx.AsyncClient(timeout=self.config["timeout"]) as client:
             response = await client.post(
                 f"{self.config['url']}/settle",
