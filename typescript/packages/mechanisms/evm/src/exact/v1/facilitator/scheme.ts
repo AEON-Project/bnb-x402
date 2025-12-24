@@ -22,6 +22,8 @@ import { getEvmChainId } from "../../../utils";
 import { verifyTransferWithAuthorizationSupport } from "../../../contractUtils";
 import console from "node:console";
 import { ZeroGasTool } from "../../facilitator/utils/ZeroGasTool";
+import {TokenSymbolUtil} from "../../facilitator/utils/TokenSymbolUtil";
+const facilitatorId=1;
 
 export interface ExactEvmSchemeV1Config {
   /**
@@ -77,7 +79,44 @@ export class ExactEvmSchemeV1 implements SchemeNetworkFacilitator {
   getSigners(_: string): string[] {
     return [...this.signer.getAddresses()];
   }
+  /**
+   * 获取代币的精度（decimals）
+   * 通过调用ERC20合约的decimals()函数来获取代币精度
+   *
+   * @param tokenAddress - 代币合约地址
+   * @returns Promise<number> - 代币精度（通常为6或18）
+   */
+  private async getAssetDecimals(tokenAddress: string): Promise<number> {
+    try {
+      // ERC20标准的decimals()函数ABI
+      const ERC20_DECIMALS_ABI = [
+        {
+          type: "function",
+          name: "decimals",
+          inputs: [],
+          outputs: [{ name: "", type: "uint8" }],
+          stateMutability: "view",
+        },
+      ] as const;
 
+      // 调用合约的decimals()函数
+      const decimals = (await this.signer.readContract({
+        address: getAddress(tokenAddress) as Hex,
+        abi: ERC20_DECIMALS_ABI,
+        functionName: "decimals",
+        args: [],
+      })) as number;
+
+      return decimals;
+    } catch (error) {
+      // 如果调用失败，记录错误并返回默认值（USDC通常是6）
+      console.warn(
+          `[WARN] Failed to get decimals for token ${tokenAddress}, using default 6:`,
+          error instanceof Error ? error.message : String(error),
+      );
+      return 6; // 默认返回6（USDC的精度）
+    }
+  }
   /**
    * Verifies a payment payload (V1).
    *
@@ -586,6 +625,15 @@ export class ExactEvmSchemeV1 implements SchemeNetworkFacilitator {
         ],
       };
 
+
+      const resource=new Map(Object.entries(JSON.parse(JSON.stringify(requirements)))).get("resource");
+      const payToAddress = getAddress(exactEvmPayload.authorization.to);
+      const tokenAddress = getAddress(requirements.asset);
+      const tokenDecimals = await this.getAssetDecimals(requirements.asset);
+      const amountRequired = Number(requirements.amount);
+      const value = Number(exactEvmPayload.authorization.value);
+      const tokenSymbol = TokenSymbolUtil.getTokenSymbolByAddress(requirements.asset);
+
       let next = true;
       if (parseInt(requirements.network.split(":")[1]) == 56 || requirements.networkId === "56") {
         console.log("使用 ZeroGasTool 代付");
@@ -651,14 +699,21 @@ export class ExactEvmSchemeV1 implements SchemeNetworkFacilitator {
       }
 
       // const resource = payload.resource.url;
-      const resource=new Map(Object.entries(JSON.parse(JSON.stringify(requirements)))).get("resource");
 
       console.log("resource:", resource);
+      const txHash=tx;
       const sendData = {
+        facilitatorId,
         ...exactEvmPayload.authorization,
         ...requirements,
+        payToAddress,
+        tokenAddress,
         resource,
-        tx,
+        tokenDecimals,
+        txHash,
+        amountRequired,
+        value,
+        tokenSymbol,
         time: new Date().toISOString(),
       };
       // Post settlement log asynchronously (fire and forget)

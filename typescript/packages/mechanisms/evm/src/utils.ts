@@ -29,6 +29,8 @@ export function getEvmChainId(network: Network): number {
 
   const networkMap: Record<string, number> = {
     base: 8453,
+    xLayer: 196,
+    bsc: 56,
     "base-sepolia": 84532,
     ethereum: 1,
     sepolia: 11155111,

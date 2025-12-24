@@ -22,6 +22,30 @@ export const aeonAuthorizationTypes = {
   ],
 };
 
+
+export const ERC20_ABI = [
+  {
+    type: "function",
+    name: "approve",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ name: "success", type: "bool" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "allowance",
+    inputs: [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+    ],
+    outputs: [{ name: "remaining", type: "uint256" }],
+    stateMutability: "view",
+  },
+] as const;
+
 export const aeonAuthorizationPrimaryType = "tokenTransferWithAuthorization";
 
 

@@ -3,7 +3,7 @@ import { encodeFunctionData, getAddress, Hex } from "viem";
 import {
   aeonAuthorizationPrimaryType,
   aeonAuthorizationTypes,
-  authorizationTypes,
+  authorizationTypes, ERC20_ABI,
 } from "../../constants";
 import { ClientEvmSigner } from "../../signer";
 import { ExactEvmPayloadV2 } from "../../types";
@@ -150,28 +150,6 @@ export class ExactEvmScheme implements SchemeNetworkClient {
       );
     }
 
-    const ERC20_ABI = [
-      {
-        type: "function",
-        name: "approve",
-        inputs: [
-          { name: "spender", type: "address" },
-          { name: "amount", type: "uint256" },
-        ],
-        outputs: [{ name: "success", type: "bool" }],
-        stateMutability: "nonpayable",
-      },
-      {
-        type: "function",
-        name: "allowance",
-        inputs: [
-          { name: "owner", type: "address" },
-          { name: "spender", type: "address" },
-        ],
-        outputs: [{ name: "remaining", type: "uint256" }],
-        stateMutability: "view",
-      },
-    ] as const;
     const from = getAddress(authorization.from);
     const facilitatorAddress = getAddress("0x555e3311a9893c9B17444C1Ff0d88192a57Ef13e");
 

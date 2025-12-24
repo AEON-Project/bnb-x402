@@ -15,5 +15,7 @@ export const NETWORKS: string[] = [
   "peaq",
   "story",
   "educhain",
+  "xLayer",
+  "bsc",
   "skale-base-sepolia",
 ];

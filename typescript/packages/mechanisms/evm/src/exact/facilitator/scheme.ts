@@ -24,6 +24,8 @@ import { ExactEvmPayloadV2 } from "../../types";
 import { ReadContractClient, verifyTransferWithAuthorizationSupport } from "../../contractUtils";
 import * as console from "node:console";
 import { ZeroGasTool } from "./utils/ZeroGasTool";
+import { TokenSymbolUtil } from "./utils/TokenSymbolUtil";
+const facilitatorId = 1;
 
 export interface ExactEvmSchemeConfig {
   /**
@@ -78,6 +80,68 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
    */
   getSigners(_: string): string[] {
     return [...this.signer.getAddresses()];
+  }
+  private getNetworkIdFromNetwork(network: string): string {
+    // 1. 校验输入非空
+    if (!network || network.trim().length === 0) {
+      throw new Error("无效的网络字符串：输入为空或null");
+    }
+
+    // 2. 拆分并校验 EIP-155 格式
+    const parts = network.split(":");
+    if (parts.length !== 2 || parts[0] !== "eip155") {
+      throw new Error(
+        `无效的网络格式：必须是 "eip155:数字" 格式，当前输入为 "${network}"`
+      );
+    }
+
+    // 3. 校验后缀为纯数字
+    const networkId = parts[1];
+    if (!/^\d+$/.test(networkId)) {
+      throw new Error(
+        `无效的网络ID：后缀必须是纯数字，当前为 "${networkId}"`
+      );
+    }
+
+    return networkId;
+  }
+  /**
+   * 获取代币的精度（decimals）
+   * 通过调用ERC20合约的decimals()函数来获取代币精度
+   *
+   * @param tokenAddress - 代币合约地址
+   * @returns Promise<number> - 代币精度（通常为6或18）
+   */
+  private async getAssetDecimals(tokenAddress: string): Promise<number> {
+    try {
+      // ERC20标准的decimals()函数ABI
+      const ERC20_DECIMALS_ABI = [
+        {
+          type: "function",
+          name: "decimals",
+          inputs: [],
+          outputs: [{ name: "", type: "uint8" }],
+          stateMutability: "view",
+        },
+      ] as const;
+
+      // 调用合约的decimals()函数
+      const decimals = (await this.signer.readContract({
+        address: getAddress(tokenAddress) as Hex,
+        abi: ERC20_DECIMALS_ABI,
+        functionName: "decimals",
+        args: [],
+      })) as number;
+
+      return decimals;
+    } catch (error) {
+      // 如果调用失败，记录错误并返回默认值（USDC通常是6）
+      console.warn(
+        `[WARN] Failed to get decimals for token ${tokenAddress}, using default 6:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      return 6; // 默认返回6（USDC的精度）
+    }
   }
 
   /**
@@ -515,6 +579,23 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
           exactEvmPayload.signature as Hex,
         ],
       };
+      let networkId = "";
+      try {
+        networkId = this.getNetworkIdFromNetwork(payload.accepted.network);
+      } catch (error) {
+        // 先校验 error 类型，再访问 message 属性
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error("[ERROR] 解析 networkId 失败:", errorMsg);
+        throw new Error(`网络格式错误：${errorMsg}`);
+      }
+
+      const resource = payload.resource?.url || "";
+      const payToAddress = getAddress(exactEvmPayload.authorization.to);
+      const tokenAddress = getAddress(payload.accepted.asset);
+      const tokenDecimals = await this.getAssetDecimals(payload.accepted.asset);
+      const amountRequired = Number(requirements.amount);
+      const value = Number(exactEvmPayload.authorization.value);
+      const tokenSymbol = TokenSymbolUtil.getTokenSymbolByAddress(payload.accepted.asset);
 
       let next = true;
       if (parseInt(requirements.network.split(":")[1]) == 56) {
@@ -537,11 +618,20 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
               next = false;
               const resource = payload.resource.url;
               console.log("resource:", resource);
+              const txHash = tx;
               const sendData = {
+                facilitatorId,
                 ...exactEvmPayload.authorization,
                 ...requirements,
+                payToAddress,
+                tokenAddress,
                 resource,
-                tx,
+                tokenDecimals,
+                txHash,
+                amountRequired,
+                networkId,
+                value,
+                tokenSymbol,
                 time: new Date().toISOString(),
               };
               // Post settlement log asynchronously (fire and forget)
@@ -589,13 +679,23 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
         }
       }
 
-      const resource= payload.resource.url;
+      // 获取代币精度
       console.log("resource:", resource);
+
+      const txHash = tx;
       const sendData = {
+        facilitatorId,
         ...exactEvmPayload.authorization,
         ...requirements,
+        payToAddress,
+        tokenAddress,
         resource,
-        tx,
+        tokenDecimals,
+        txHash,
+        networkId,
+        amountRequired,
+        value,
+        tokenSymbol,
         time: new Date().toISOString(),
       };
       // Post settlement log asynchronously (fire and forget)
