@@ -70,7 +70,7 @@ app.middleware("http")(
                 eip712=EIP712Domain(name="USDT", version="1"),
             ),
         ),
-        network="xlayer",
+        network="xLayer",
     )
 )
 
