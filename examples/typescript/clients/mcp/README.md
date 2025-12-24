@@ -20,6 +20,13 @@ pnpm build
 cd clients/mcp
 ```
 
+
+Copy `.env-local` to `.env` and add your private keys:
+
+```bash
+cp .env-local .env
+```
+
 2. Configure Claude Desktop MCP settings:
 ```json
 {
