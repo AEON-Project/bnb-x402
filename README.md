@@ -67,15 +67,16 @@ pnpm build
 #### Server Side
 
 ```bash
-cd examples/typescript/servers/
+cd examples/typescript/servers/hono/
+pnpm install 
 pnpm dev
-cd ..  
 ```
 
 #### Client Side
 
 ```bash
-cd examples/typescript/clients/
+cd examples/typescript/clients/fetch/
+pnpm install 
 pnpm  dev
 ```
 
