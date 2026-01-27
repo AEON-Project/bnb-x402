@@ -9,6 +9,9 @@ export class TokenSymbolUtil {
             "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d": { symbol: "USDC", name: "USD Coin" },
             "0x6e3bcf81d331fa7bd79ac2642486c70beae2600e": { symbol: "TESTU", name: "Test USDT" }
         },
+        "2366": {
+            "0x7aB6f3ed87C42eF0aDb67Ed95090f8bF5240149e": { symbol: "USDC", name: "Bridged USDC (Kite AI)" },
+        },
         "8453": {
             "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913": { symbol: "USDC", name: "USD Coin" },
             "0xfde4c96c8593536e31f229ea8f37b2ada2699bb2": { symbol: "USDT", name: "Tether USD" }

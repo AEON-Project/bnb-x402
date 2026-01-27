@@ -53,18 +53,24 @@ app.use(
           //   network: "eip155:196",
           //   payTo: evmAddress,
           // },
-          {
-            scheme: "exact",
-            price: "$0.001",
-            network: "eip155:56",
-            payTo: evmAddress,
-          },
           // {
           //   scheme: "exact",
           //   price: "$0.001",
-          //   network: "eip155:8453",
+          //   network: "eip155:56",
           //   payTo: evmAddress,
-          // }
+          // },
+          {
+            scheme: "exact",
+            price: "$0.001",
+            network: "eip155:2366",
+            payTo: evmAddress,
+          },
+          {
+            scheme: "exact",
+            price: "$0.001",
+            network: "eip155:8453",
+            payTo: evmAddress,
+          }
         ],
         description: "Weather data",
         mimeType: "application/json",
@@ -74,6 +80,7 @@ app.use(
       .register("eip155:196", new ExactEvmScheme())
         .register("eip155:56", new ExactEvmScheme())
         .register("eip155:8453", new ExactEvmScheme())
+        .register("eip155:2366", new ExactEvmScheme())
   ),
 );
 

@@ -121,6 +121,16 @@
         "types": "./dist/cjs/exact/v1/facilitator/index.d.ts",
         "default": "./dist/cjs/exact/v1/facilitator/index.js"
       }
+    },
+    "./custom-chains": {
+      "import": {
+        "types": "./dist/esm/custom-chains/index.d.mts",
+        "default": "./dist/esm/custom-chains/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/custom-chains/index.d.ts",
+        "default": "./dist/cjs/custom-chains/index.js"
+      }
     }
   },
   "files": [

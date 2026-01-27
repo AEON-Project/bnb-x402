@@ -3,6 +3,7 @@ NETWORK_TO_ID = {
     "base": "8453",
     "bsc": "56",
     "xLayer": "196",
+    "kite": "2366",
     "avalanche-fuji": "43113",
     "avalanche": "43114",
 }

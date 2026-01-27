@@ -50,15 +50,24 @@ app.middleware("http")(
         #         eip712=EIP712Domain(name="USD Coin", version="2"),
         #     ),
         # ),
+        # price=TokenAmount(
+        #     amount="1000",
+        #     asset=TokenAsset(
+        #         address="0x55d398326f99059fF775485246999027B3197955",
+        #         decimals=18,
+        #         eip712=EIP712Domain(name="USDT", version="1"),
+        #     ),
+        # ),
+        # network="bsc",
         price=TokenAmount(
             amount="1000",
             asset=TokenAsset(
-                address="0x55d398326f99059fF775485246999027B3197955",
-                decimals=18,
-                eip712=EIP712Domain(name="USDT", version="1"),
+                address="0x7aB6f3ed87C42eF0aDb67Ed95090f8bF5240149e",
+                decimals=6,
+                eip712=EIP712Domain(name="Bridged USDC (Kite AI)", version="2"),
             ),
         ),
-        network="bsc",
+        network="kite",
         # price=TokenAmount(
         #     amount="1000",
         #     # asset=TokenAsset(

@@ -213,6 +213,11 @@ export class ExactEvmScheme implements SchemeNetworkServer {
         name: "USD Coin",
         version: "2",
       },
+      "eip155:2366": {
+        address: "0x7aB6f3ed87C42eF0aDb67Ed95090f8bF5240149e",
+        name: "Bridged USDC (Kite AI)",
+        version: "2",
+      },
     };
 
     const assetInfo = usdcInfo[network];
