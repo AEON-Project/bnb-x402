@@ -60,11 +60,11 @@ app.middleware("http")(
         # ),
         # network="bsc",
         price=TokenAmount(
-            amount="1000",
+            amount="100000",
             asset=TokenAsset(
-                address="0x7aB6f3ed87C42eF0aDb67Ed95090f8bF5240149e",
-                decimals=6,
-                eip712=EIP712Domain(name="Bridged USDC (Kite AI)", version="2"),
+                address="0x5D8A41abdBC6aE699e772Fa19c619eab41a240d7",
+                decimals=18,
+                eip712=EIP712Domain(name="TESTU", version="1"),
             ),
         ),
         network="kite",
