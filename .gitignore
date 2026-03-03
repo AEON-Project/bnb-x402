@@ -9,3 +9,8 @@ __pycache__/
 **/.DS_Store
 e2e/facilitators/external-proxies/*
 !e2e/facilitators/external-proxies/README.md
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
