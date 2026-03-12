@@ -201,6 +201,7 @@ class x402Client:
         return (
                 "authorization is expired" in msg
                 or "invalid signature" in msg
+                or "authorization expired" in msg
                 or "authorization is used" in msg
                 or "authorization is not yet valid" in msg
                 or "invalid authorization" in msg
