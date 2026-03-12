@@ -68,15 +68,24 @@ app.middleware("http")(
         #     ),
         # ),
         # network="kite",
+        # price=TokenAmount(
+        #     amount="100000",
+        #     asset=TokenAsset(
+        #         address="0xA0f09D908279ddd28B5370c2b0612d1A10ee87cA",
+        #         decimals=18,
+        #         eip712=EIP712Domain(name="TESTU", version="1"),
+        #     ),
+        # ),
+        # network="bscTest",
         price=TokenAmount(
-            amount="100000",
+            amount="100000000000000000",
             asset=TokenAsset(
-                address="0xA0f09D908279ddd28B5370c2b0612d1A10ee87cA",
+                address="0xcE24439F2D9C6a2289F741120FE202248B666666",
                 decimals=18,
-                eip712=EIP712Domain(name="TESTU", version="1"),
+                eip712=EIP712Domain(name="United Stables", version="1"),
             ),
         ),
-        network="bscTest",
+        network="bsc",
         # price=TokenAmount(
         #     amount="1000",
         #     # asset=TokenAsset(
