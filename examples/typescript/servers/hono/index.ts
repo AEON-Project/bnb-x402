@@ -68,6 +68,12 @@ app.use(
           {
             scheme: "exact",
             price: "$0.001",
+            network: "eip155:97",
+            payTo: evmAddress,
+          },
+          {
+            scheme: "exact",
+            price: "$0.001",
             network: "eip155:8453",
             payTo: evmAddress,
           }
@@ -81,6 +87,7 @@ app.use(
         .register("eip155:56", new ExactEvmScheme())
         .register("eip155:8453", new ExactEvmScheme())
         .register("eip155:2366", new ExactEvmScheme())
+        .register("eip155:97", new ExactEvmScheme())
   ),
 );
 

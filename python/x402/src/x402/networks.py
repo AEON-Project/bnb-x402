@@ -1,7 +1,7 @@
 from typing import Literal
 
 
-SupportedNetworks = Literal["base", "base-sepolia", "avalanche-fuji", "avalanche", "bsc", "xLayer", "kite"]
+SupportedNetworks = Literal["base", "base-sepolia", "avalanche-fuji", "avalanche", "bsc", "xLayer", "kite","bscTest"]
 
 EVM_NETWORK_TO_CHAIN_ID = {
     "base-sepolia": 84532,
@@ -11,4 +11,5 @@ EVM_NETWORK_TO_CHAIN_ID = {
     "xLayer": 196,
     "bsc": 56,
     "kite": 2366,
+    "bscTest": 97,
 }

@@ -24,7 +24,7 @@ app.middleware("http")(
     require_payment(
         path="/weather",
         pay_to_address=ADDRESS,
-        facilitator_config={"url": FACILITATOR_URL,"apiKey": API_KEY},
+        facilitator_config={"url": FACILITATOR_URL, "apiKey": API_KEY},
         # price=TokenAmount(
         #     amount="1000",
         #     asset=TokenAsset(
@@ -59,15 +59,24 @@ app.middleware("http")(
         #     ),
         # ),
         # network="bsc",
+        # price=TokenAmount(
+        #     amount="1000",
+        #     asset=TokenAsset(
+        #         address="0x7aB6f3ed87C42eF0aDb67Ed95090f8bF5240149e",
+        #         decimals=6,
+        #         eip712=EIP712Domain(name="Bridged USDC (Kite AI)", version="2"),
+        #     ),
+        # ),
+        # network="kite",
         price=TokenAmount(
-            amount="1000",
+            amount="100000",
             asset=TokenAsset(
-                address="0x7aB6f3ed87C42eF0aDb67Ed95090f8bF5240149e",
-                decimals=6,
-                eip712=EIP712Domain(name="Bridged USDC (Kite AI)", version="2"),
+                address="0xA0f09D908279ddd28B5370c2b0612d1A10ee87cA",
+                decimals=18,
+                eip712=EIP712Domain(name="TESTU", version="1"),
             ),
         ),
-        network="kite",
+        network="bscTest",
         # price=TokenAmount(
         #     amount="1000",
         #     # asset=TokenAsset(

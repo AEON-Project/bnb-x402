@@ -6,6 +6,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { createWalletClient, http, publicActions } from "viem";
 import {bsc, xLayer} from "viem/chains";
 import { kite } from "@x402/evm/custom-chains";
+import { bscTest } from "@x402/evm/custom-chains";
 import axios from "axios";
 
 config();
@@ -29,7 +30,7 @@ async function main(): Promise<void> {
   const evmAccount = privateKeyToAccount(evmPrivateKey);
   const walletClient = createWalletClient({
     account: evmAccount,
-    chain: kite,
+    chain: bscTest,
     transport: http(),
   }).extend(publicActions);
 

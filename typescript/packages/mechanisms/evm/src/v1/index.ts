@@ -18,5 +18,6 @@ export const NETWORKS: string[] = [
   "xLayer",
   "bsc",
   "kite",
+  "bscTest",
   "skale-base-sepolia",
 ];

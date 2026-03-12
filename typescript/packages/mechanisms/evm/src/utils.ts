@@ -32,6 +32,7 @@ export function getEvmChainId(network: Network): number {
     xLayer: 196,
     bsc: 56,
     kite: 2366,
+    bscTest: 97,
     "base-sepolia": 84532,
     ethereum: 1,
     sepolia: 11155111,
