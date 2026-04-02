@@ -1,6 +1,6 @@
 {
-  "name": "@x402/svm",
-  "version": "2.0.0",
+  "name": "@aeon-ai-pay/svm",
+  "version": "2.1.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/cjs/index.d.ts",
@@ -45,7 +45,7 @@
     "vitest": "^3.0.5"
   },
   "dependencies": {
-    "@x402/core": "workspace:*",
+    "@aeon-ai-pay/core": "workspace:*",
     "@scure/base": "^1.2.6",
     "@solana-program/compute-budget": "^0.8.0",
     "@solana-program/token": "^0.5.1",
@@ -128,5 +128,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

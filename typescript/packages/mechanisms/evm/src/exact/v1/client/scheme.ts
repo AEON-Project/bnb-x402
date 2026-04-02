@@ -3,8 +3,8 @@ import {
   PaymentPayload,
   PaymentRequirements,
   SchemeNetworkClient,
-} from "@x402/core/types";
-import { PaymentRequirementsV1 } from "@x402/core/types/v1";
+} from "@aeon-ai-pay/core/types";
+import { PaymentRequirementsV1 } from "@aeon-ai-pay/core/types/v1";
 import {encodeFunctionData, getAddress, Hex} from "viem";
 import {aeonAuthorizationPrimaryType, aeonAuthorizationTypes, authorizationTypes, ERC20_ABI} from "../../../constants";
 import { ClientEvmSigner } from "../../../signer";

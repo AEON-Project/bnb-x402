@@ -1,4 +1,4 @@
-import { VerifyResponse, PaymentPayload, PaymentRequirements } from "@x402/core/types";
+import { VerifyResponse, PaymentPayload, PaymentRequirements } from "@aeon-ai-pay/core/types";
 import { getFacilitator } from "../index";
 
 /**

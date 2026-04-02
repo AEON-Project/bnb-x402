@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ExactEvmScheme } from "../../../src/exact/facilitator/scheme";
 import { ExactEvmScheme as ClientExactEvmScheme } from "../../../src/exact/client/scheme";
 import type { ClientEvmSigner, FacilitatorEvmSigner } from "../../../src/signer";
-import { PaymentRequirements, PaymentPayload } from "@x402/core/types";
+import { PaymentRequirements, PaymentPayload } from "@aeon-ai-pay/core/types";
 
 describe("ExactEvmScheme (Facilitator)", () => {
   let facilitator: ExactEvmScheme;

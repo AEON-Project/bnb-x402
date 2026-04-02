@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ExactSvmScheme } from "../../src/exact/facilitator/scheme";
 import type { FacilitatorSvmSigner } from "../../src/signer";
-import type { PaymentRequirements, PaymentPayload } from "@x402/core/types";
+import type { PaymentRequirements, PaymentPayload } from "@aeon-ai-pay/core/types";
 import { USDC_DEVNET_ADDRESS, SOLANA_DEVNET_CAIP2 } from "../../src/constants";
 
 describe("ExactSvmScheme", () => {

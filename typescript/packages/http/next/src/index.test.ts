@@ -5,9 +5,9 @@ import type {
   x402HTTPResourceServer,
   PaywallProvider,
   FacilitatorClient,
-} from "@x402/core/server";
-import { x402ResourceServer } from "@x402/core/server";
-import type { PaymentPayload, PaymentRequirements, SchemeNetworkServer } from "@x402/core/types";
+} from "@aeon-ai-pay/core/server";
+import { x402ResourceServer } from "@aeon-ai-pay/core/server";
+import type { PaymentPayload, PaymentRequirements, SchemeNetworkServer } from "@aeon-ai-pay/core/types";
 import { paymentProxy, paymentProxyFromConfig, withX402, type SchemeRegistration } from "./index";
 
 import { createHttpServer } from "./utils";
@@ -21,8 +21,8 @@ vi.mock("./utils", async () => {
   };
 });
 
-// Mock @x402/core/server
-vi.mock("@x402/core/server", () => ({
+// Mock @aeon-ai-pay/core/server
+vi.mock("@aeon-ai-pay/core/server", () => ({
   x402ResourceServer: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(undefined),
     registerExtension: vi.fn(),

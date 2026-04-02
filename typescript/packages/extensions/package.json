@@ -1,6 +1,6 @@
 {
-  "name": "@x402/extensions",
-  "version": "2.0.0",
+  "name": "@aeon-ai-pay/extensions",
+  "version": "2.1.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/cjs/index.d.ts",
@@ -43,7 +43,7 @@
     "vitest": "^3.0.5"
   },
   "dependencies": {
-    "@x402/core": "workspace:*",
+    "@aeon-ai-pay/core": "workspace:*",
     "ajv": "^8.17.1",
     "zod": "^3.24.2"
   },
@@ -81,5 +81,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

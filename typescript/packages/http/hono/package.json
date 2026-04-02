@@ -1,6 +1,6 @@
 {
-  "name": "@x402/hono",
-  "version": "2.0.0",
+  "name": "@aeon-ai-pay/hono",
+  "version": "2.1.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/index.d.ts",
@@ -39,16 +39,16 @@
     "vitest": "^3.0.5"
   },
   "dependencies": {
-    "@x402/core": "workspace:^",
-    "@x402/extensions": "workspace:^",
+    "@aeon-ai-pay/core": "workspace:^",
+    "@aeon-ai-pay/extensions": "workspace:^",
     "zod": "^3.24.2"
   },
   "peerDependencies": {
     "hono": "^4.0.0",
-    "@x402/paywall": "workspace:*"
+    "@aeon-ai-pay/paywall": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@x402/paywall": {
+    "@aeon-ai-pay/paywall": {
       "optional": true
     }
   },
@@ -66,5 +66,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

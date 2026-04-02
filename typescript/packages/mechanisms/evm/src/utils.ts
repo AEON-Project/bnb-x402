@@ -1,5 +1,5 @@
 import {Hex, toHex} from "viem";
-import { Network } from "@x402/core/types";
+import { Network } from "@aeon-ai-pay/core/types";
 
 /**
  * Extract chain ID from network string (e.g., "base-sepolia" -> 84532)

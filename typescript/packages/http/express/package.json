@@ -1,6 +1,6 @@
 {
-  "name": "@x402/express",
-  "version": "2.0.0",
+  "name": "@aeon-ai-pay/express",
+  "version": "2.1.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/index.d.ts",
@@ -42,17 +42,17 @@
   "dependencies": {
     "@coinbase/cdp-sdk": "^1.22.0",
     "@solana/kit": "^2.1.1",
-    "@x402/core": "workspace:^",
-    "@x402/extensions": "workspace:^",
+    "@aeon-ai-pay/core": "workspace:^",
+    "@aeon-ai-pay/extensions": "workspace:^",
     "viem": "^2.39.3",
     "zod": "^3.24.2"
   },
   "peerDependencies": {
-    "@x402/paywall": "workspace:*",
+    "@aeon-ai-pay/paywall": "workspace:*",
     "express": "^4.0.0 || ^5.0.0"
   },
   "peerDependenciesMeta": {
-    "@x402/paywall": {
+    "@aeon-ai-pay/paywall": {
       "optional": true
     }
   },
@@ -70,5 +70,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -4,7 +4,7 @@ import {
   SchemeNetworkFacilitator,
   SettleResponse,
   VerifyResponse,
-} from "@x402/core/types";
+} from "@aeon-ai-pay/core/types";
 import {
   encodeFunctionData,
   getAddress,

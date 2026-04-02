@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { WalletAccount } from "@wallet-standard/base";
 import type { WalletWithSolanaFeatures } from "@solana/wallet-standard-features";
 
-import { registerExactSvmScheme } from "@x402/svm/exact/client";
-import { x402Client } from "@x402/core/client";
-import type { PaymentRequired } from "@x402/core/types";
+import { registerExactSvmScheme } from "@aeon-ai-pay/svm/exact/client";
+import { x402Client } from "@aeon-ai-pay/core/client";
+import type { PaymentRequired } from "@aeon-ai-pay/core/types";
 
 import { Spinner } from "./Spinner";
 import { getNetworkDisplayName, SOLANA_NETWORK_REFS } from "../paywallUtils";

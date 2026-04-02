@@ -13,7 +13,7 @@
  * ### For Resource Servers (V2)
  *
  * ```typescript
- * import { declareDiscoveryExtension, BAZAAR } from '@x402/extensions/bazaar';
+ * import { declareDiscoveryExtension, BAZAAR } from '@aeon-ai-pay/extensions/bazaar';
  *
  * // Declare a GET endpoint
  * const extension = declareDiscoveryExtension(
@@ -44,7 +44,7 @@
  * import {
  *   extractDiscoveryInfo,
  *   BAZAAR
- * } from '@x402/extensions/bazaar';
+ * } from '@aeon-ai-pay/extensions/bazaar';
  *
  * // V2: Extensions are in PaymentPayload.extensions (client copied from PaymentRequired)
  * // V1: Discovery info is in PaymentRequirements.outputSchema
@@ -64,7 +64,7 @@
  * The `extractDiscoveryInfo` function automatically handles v1 format as a fallback.
  *
  * ```typescript
- * import { extractDiscoveryInfoV1 } from '@x402/extensions/bazaar/v1';
+ * import { extractDiscoveryInfoV1 } from '@aeon-ai-pay/extensions/bazaar/v1';
  *
  * // Direct v1 extraction
  * const infoV1 = extractDiscoveryInfoV1(paymentRequirementsV1);

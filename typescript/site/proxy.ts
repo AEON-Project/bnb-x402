@@ -1,11 +1,11 @@
-import { paymentProxyFromConfig } from "@x402/next";
-import { HTTPFacilitatorClient } from "@x402/core/server";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { ExactSvmScheme } from "@x402/svm/exact/server";
+import { paymentProxyFromConfig } from "@aeon-ai-pay/next";
+import { HTTPFacilitatorClient } from "@aeon-ai-pay/core/server";
+import { ExactEvmScheme } from "@aeon-ai-pay/evm/exact/server";
+import { ExactSvmScheme } from "@aeon-ai-pay/svm/exact/server";
 import { NextRequest, NextResponse } from "next/server";
-import { createPaywall } from "@x402/paywall";
-import { evmPaywall } from "@x402/paywall/evm";
-import { svmPaywall } from "@x402/paywall/svm";
+import { createPaywall } from "@aeon-ai-pay/paywall";
+import { evmPaywall } from "@aeon-ai-pay/paywall/evm";
+import { svmPaywall } from "@aeon-ai-pay/paywall/svm";
 
 const evmPayeeAddress = process.env.RESOURCE_EVM_ADDRESS as `0x${string}`;
 const svmPayeeAddress = process.env.RESOURCE_SVM_ADDRESS as string;

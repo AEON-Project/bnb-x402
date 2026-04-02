@@ -7,8 +7,8 @@
  * This module transforms v1 data into v2 DiscoveryInfo format.
  */
 
-import type { PaymentRequirementsV1 } from "@x402/core/types";
-import type { BodyMethods, QueryParamMethods } from "@x402/core/http";
+import type { PaymentRequirementsV1 } from "@aeon-ai-pay/core/types";
+import type { BodyMethods, QueryParamMethods } from "@aeon-ai-pay/core/http";
 import type { DiscoveryInfo, QueryDiscoveryInfo, BodyDiscoveryInfo } from "../types";
 
 /**

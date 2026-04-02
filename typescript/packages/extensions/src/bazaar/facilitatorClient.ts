@@ -2,7 +2,7 @@
  * Client extensions for querying Bazaar discovery resources
  */
 
-import { HTTPFacilitatorClient } from "@x402/core/http";
+import { HTTPFacilitatorClient } from "@aeon-ai-pay/core/http";
 import { WithExtensions } from "../types";
 
 /**

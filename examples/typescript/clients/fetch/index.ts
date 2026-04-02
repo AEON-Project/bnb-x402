@@ -1,7 +1,7 @@
 import { config } from "dotenv";
-import { x402Client, wrapFetchWithPayment, x402HTTPClient } from "@x402/fetch";
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { toClientEvmSigner } from "@x402/evm";
+import { x402Client, wrapFetchWithPayment, x402HTTPClient } from "@aeon-ai-pay/fetch";
+import { registerExactEvmScheme } from "@aeon-ai-pay/evm/exact/client";
+import { toClientEvmSigner } from "@aeon-ai-pay/evm";
 import { privateKeyToAccount } from "viem/accounts";
 import { createPublicClient, createWalletClient, http, publicActions } from "viem";
 import { bsc, xLayer, base } from "viem/chains";
@@ -15,9 +15,9 @@ const endpointPath = process.env.ENDPOINT_PATH || "/weather";
 const url = `${baseURL}${endpointPath}`;
 
 /**
- * Example demonstrating how to use @x402/fetch to make requests to x402-protected endpoints.
+ * Example demonstrating how to use @aeon-ai-pay/fetch to make requests to x402-protected endpoints.
  *
- * This uses the helper registration functions from @x402/evm and @x402/svm to register
+ * This uses the helper registration functions from @aeon-ai-pay/evm and @aeon-ai-pay/svm to register
  * all supported networks for both v1 and v2 protocols.
  *
  * Required environment variables:

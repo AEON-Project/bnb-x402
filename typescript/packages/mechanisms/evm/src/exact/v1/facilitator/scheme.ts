@@ -5,8 +5,8 @@ import {
   SchemeNetworkFacilitator,
   SettleResponse,
   VerifyResponse,
-} from "@x402/core/types";
-import { PaymentRequirementsV1 } from "@x402/core/types/v1";
+} from "@aeon-ai-pay/core/types";
+import { PaymentRequirementsV1 } from "@aeon-ai-pay/core/types/v1";
 import {
   encodeFunctionData,
   getAddress,

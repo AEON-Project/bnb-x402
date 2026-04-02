@@ -1,7 +1,7 @@
 import { config } from "dotenv";
-import { paymentMiddleware, x402ResourceServer } from "@x402/hono";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { HTTPFacilitatorClient } from "@x402/core/server";
+import { paymentMiddleware, x402ResourceServer } from "@aeon-ai-pay/hono";
+import { ExactEvmScheme } from "@aeon-ai-pay/evm/exact/server";
+import { HTTPFacilitatorClient } from "@aeon-ai-pay/core/server";
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 config();

@@ -1,12 +1,12 @@
 import { config } from "dotenv";
-import { x402Client, wrapAxiosWithPayment, x402HTTPClient } from "@x402/axios";
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { toClientEvmSigner } from "@x402/evm";
+import { x402Client, wrapAxiosWithPayment, x402HTTPClient } from "@aeon-ai-pay/axios";
+import { registerExactEvmScheme } from "@aeon-ai-pay/evm/exact/client";
+import { toClientEvmSigner } from "@aeon-ai-pay/evm";
 import { privateKeyToAccount } from "viem/accounts";
 import { createWalletClient, http, publicActions } from "viem";
 import {bsc, xLayer} from "viem/chains";
-import { kite } from "@x402/evm/custom-chains";
-import { bscTest } from "@x402/evm/custom-chains";
+import { kite } from "@aeon-ai-pay/evm/custom-chains";
+import { bscTest } from "@aeon-ai-pay/evm/custom-chains";
 import axios from "axios";
 
 config();
@@ -17,9 +17,9 @@ const endpointPath = process.env.ENDPOINT_PATH || "/weather";
 const url = `${baseURL}${endpointPath}`;
 
 /**
- * Example demonstrating how to use @x402/axios to make requests to x402-protected endpoints.
+ * Example demonstrating how to use @aeon-ai-pay/axios to make requests to x402-protected endpoints.
  *
- * This uses the helper registration functions from @x402/evm and @x402/svm to register
+ * This uses the helper registration functions from @aeon-ai-pay/evm and @aeon-ai-pay/svm to register
  * all supported networks for both v1 and v2 protocols.
  *
  * Required environment variables:
@@ -30,7 +30,7 @@ async function main(): Promise<void> {
   const evmAccount = privateKeyToAccount(evmPrivateKey);
   const walletClient = createWalletClient({
     account: evmAccount,
-    chain: bscTest,
+    chain: bsc,
     transport: http(),
   }).extend(publicActions);
 

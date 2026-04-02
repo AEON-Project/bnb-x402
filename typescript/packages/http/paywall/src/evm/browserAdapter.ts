@@ -1,4 +1,4 @@
-import type { ClientEvmSigner } from "@x402/evm";
+import type { ClientEvmSigner } from "@aeon-ai-pay/evm";
 import type { Account, WalletClient } from "viem";
 
 /**

@@ -20,7 +20,7 @@ import {
   setTransactionMessageLifetimeUsingBlockhash,
   type Address,
 } from "@solana/kit";
-import type { PaymentPayload, PaymentRequirements, SchemeNetworkClient } from "@x402/core/types";
+import type { PaymentPayload, PaymentRequirements, SchemeNetworkClient } from "@aeon-ai-pay/core/types";
 import {
   DEFAULT_COMPUTE_UNIT_LIMIT,
   DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORTS,

@@ -1,6 +1,6 @@
 {
-  "name": "@x402/axios",
-  "version": "2.0.0",
+  "name": "@aeon-ai-pay/axios",
+  "version": "2.1.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/index.d.ts",
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
-    "@x402/core": "workspace:^",
+    "@aeon-ai-pay/core": "workspace:^",
     "zod": "^3.24.2"
   },
   "exports": {
@@ -56,5 +56,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

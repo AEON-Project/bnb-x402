@@ -5,12 +5,12 @@ import type {
   x402HTTPResourceServer,
   PaywallProvider,
   FacilitatorClient,
-} from "@x402/core/server";
+} from "@aeon-ai-pay/core/server";
 import {
   x402ResourceServer,
   x402HTTPResourceServer as HTTPResourceServer,
-} from "@x402/core/server";
-import type { PaymentPayload, PaymentRequirements, SchemeNetworkServer } from "@x402/core/types";
+} from "@aeon-ai-pay/core/server";
+import type { PaymentPayload, PaymentRequirements, SchemeNetworkServer } from "@aeon-ai-pay/core/types";
 import { paymentMiddleware, paymentMiddlewareFromConfig, type SchemeRegistration } from "./index";
 
 // --- Test Fixtures ---
@@ -39,7 +39,7 @@ let mockProcessSettlement: ReturnType<typeof vi.fn>;
 let mockRegisterPaywallProvider: ReturnType<typeof vi.fn>;
 let mockRequiresPayment: ReturnType<typeof vi.fn>;
 
-vi.mock("@x402/core/server", () => ({
+vi.mock("@aeon-ai-pay/core/server", () => ({
   x402ResourceServer: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(undefined),
     registerExtension: vi.fn(),

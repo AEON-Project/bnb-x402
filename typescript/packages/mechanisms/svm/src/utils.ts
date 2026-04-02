@@ -17,7 +17,7 @@ import {
 } from "@solana/kit";
 import { TOKEN_PROGRAM_ADDRESS } from "@solana-program/token";
 import { TOKEN_2022_PROGRAM_ADDRESS } from "@solana-program/token-2022";
-import type { Network } from "@x402/core/types";
+import type { Network } from "@aeon-ai-pay/core/types";
 import {
   SVM_ADDRESS_REGEX,
   DEVNET_RPC_URL,

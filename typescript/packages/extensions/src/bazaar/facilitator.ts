@@ -8,7 +8,7 @@
  */
 
 import Ajv from "ajv/dist/2020";
-import type { PaymentPayload, PaymentRequirements, PaymentRequirementsV1 } from "@x402/core/types";
+import type { PaymentPayload, PaymentRequirements, PaymentRequirementsV1 } from "@aeon-ai-pay/core/types";
 import type { DiscoveryExtension, DiscoveryInfo } from "./types";
 import { BAZAAR } from "./types";
 import { extractDiscoveryInfoV1 } from "./v1/facilitator";

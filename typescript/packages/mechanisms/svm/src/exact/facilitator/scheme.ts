@@ -24,7 +24,7 @@ import type {
   SchemeNetworkFacilitator,
   SettleResponse,
   VerifyResponse,
-} from "@x402/core/types";
+} from "@aeon-ai-pay/core/types";
 import { MAX_COMPUTE_UNIT_PRICE_MICROLAMPORTS } from "../../constants";
 import type { FacilitatorSvmSigner } from "../../signer";
 import type { ExactSvmPayloadV2 } from "../../types";

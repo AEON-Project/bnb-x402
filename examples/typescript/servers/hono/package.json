@@ -1,5 +1,5 @@
 {
-  "name": "@x402/hono-server-example",
+  "name": "@aeon-ai-pay/hono-server-example",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,11 +12,11 @@
   "dependencies": {
     "dotenv": "^16.4.7",
     "@hono/node-server": "^1.14.0",
-    "@x402/core": "workspace:*",
-    "@x402/hono": "workspace:*",
-    "@x402/evm": "workspace:*",
-    "@x402/svm": "workspace:*",
-    "@x402/extensions": "workspace:*",
+    "@aeon-ai-pay/core": "workspace:*",
+    "@aeon-ai-pay/hono": "workspace:*",
+    "@aeon-ai-pay/evm": "workspace:*",
+    "@aeon-ai-pay/svm": "workspace:*",
+    "@aeon-ai-pay/extensions": "workspace:*",
     "hono": "^4.7.1"
   },
   "devDependencies": {

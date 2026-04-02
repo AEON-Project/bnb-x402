@@ -3,9 +3,9 @@ import { createPublicClient, formatUnits, http, publicActions, type Chain } from
 import * as allChains from "viem/chains";
 import { useAccount, useSwitchChain, useWalletClient, useConnect, useDisconnect } from "wagmi";
 
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { x402Client } from "@x402/core/client";
-import type { PaymentRequired } from "@x402/core/types";
+import { registerExactEvmScheme } from "@aeon-ai-pay/evm/exact/client";
+import { x402Client } from "@aeon-ai-pay/core/client";
+import type { PaymentRequired } from "@aeon-ai-pay/core/types";
 import { getUSDCBalance } from "./utils";
 
 import { Spinner } from "./Spinner";

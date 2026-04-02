@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(ls /Users/yuanyong/work/lskj/bnb-x402/examples/typescript/node_modules/.pnpm/axios@*/node_modules/axios/lib/core/AxiosHeaders.js)",
+      "Bash(find /Users/yuanyong/work/lskj/bnb-x402/examples/typescript/node_modules/.pnpm -name AxiosHeaders.js -path */axios/*)",
+      "Bash(npx tsx -e \":*)",
+      "Bash(grep -r \"X-PAYMENT\\\\|PAYMENT-SIGNATURE\" /Users/yuanyong/work/lskj/aeon_qr_pay/ --include=*.java)",
+      "Bash(grep -E \"\\(package\\\\.json|\\\\.ts|\\\\.tsx\\)$\")",
+      "Bash(xargs sed:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm --filter @aeon-ai-pay/evm test)",
+      "Bash(git stash:*)",
+      "Bash(pnpm --filter @x402/evm test)",
+      "Bash(pnpm:*)",
+      "Bash(npm config:*)"
+    ]
+  }
+}

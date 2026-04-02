@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { ExactEvmScheme } from "../../src/exact/server/scheme";
-import { MoneyParser } from "@x402/core/types";
+import { MoneyParser } from "@aeon-ai-pay/core/types";
 
 describe("ExactEvmScheme (Server) - registerMoneyParser", () => {
   describe("Single custom parser", () => {

@@ -1,5 +1,5 @@
-import { x402ResourceServer } from "@x402/core/server";
-import { Network } from "@x402/core/types";
+import { x402ResourceServer } from "@aeon-ai-pay/core/server";
+import { Network } from "@aeon-ai-pay/core/types";
 import { ExactSvmScheme } from "./scheme";
 
 /**

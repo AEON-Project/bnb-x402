@@ -6,8 +6,8 @@ import {
   x402ResourceServer,
   RoutesConfig,
   FacilitatorClient,
-} from "@x402/core/server";
-import { SchemeNetworkServer, Network } from "@x402/core/types";
+} from "@aeon-ai-pay/core/server";
+import { SchemeNetworkServer, Network } from "@aeon-ai-pay/core/types";
 import { Context, MiddlewareHandler } from "hono";
 import { HonoAdapter } from "./adapter";
 
@@ -60,9 +60,9 @@ export interface SchemeRegistration {
  *
  * @example
  * ```typescript
- * import { paymentMiddleware } from "@x402/hono";
- * import { x402ResourceServer } from "@x402/core/server";
- * import { registerExactEvmScheme } from "@x402/evm/exact/server";
+ * import { paymentMiddleware } from "@aeon-ai-pay/hono";
+ * import { x402ResourceServer } from "@aeon-ai-pay/core/server";
+ * import { registerExactEvmScheme } from "@aeon-ai-pay/evm/exact/server";
  *
  * const server = new x402ResourceServer(myFacilitatorClient);
  * registerExactEvmScheme(server, {});
@@ -92,7 +92,7 @@ export function paymentMiddleware(
   // Dynamically register bazaar extension if routes declare it
   let bazaarPromise: Promise<void> | null = null;
   if (checkIfBazaarNeeded(routes)) {
-    bazaarPromise = import("@x402/extensions/bazaar")
+    bazaarPromise = import("@aeon-ai-pay/extensions/bazaar")
       .then(({ bazaarResourceServerExtension }) => {
         server.registerExtension(bazaarResourceServerExtension);
       })
@@ -223,7 +223,7 @@ export function paymentMiddleware(
  *
  * @example
  * ```typescript
- * import { paymentMiddlewareFromConfig } from "@x402/hono";
+ * import { paymentMiddlewareFromConfig } from "@aeon-ai-pay/hono";
  *
  * app.use(paymentMiddlewareFromConfig(
  *   routes,
@@ -254,7 +254,7 @@ export function paymentMiddlewareFromConfig(
   return paymentMiddleware(routes, ResourceServer, paywallConfig, paywall, syncFacilitatorOnStart);
 }
 
-export { x402ResourceServer, x402HTTPResourceServer } from "@x402/core/server";
+export { x402ResourceServer, x402HTTPResourceServer } from "@aeon-ai-pay/core/server";
 
 export type {
   PaymentRequired,
@@ -262,12 +262,12 @@ export type {
   PaymentPayload,
   Network,
   SchemeNetworkServer,
-} from "@x402/core/types";
+} from "@aeon-ai-pay/core/types";
 
-export type { PaywallProvider, PaywallConfig } from "@x402/core/server";
+export type { PaywallProvider, PaywallConfig } from "@aeon-ai-pay/core/server";
 
-export { RouteConfigurationError } from "@x402/core/server";
+export { RouteConfigurationError } from "@aeon-ai-pay/core/server";
 
-export type { RouteValidationError } from "@x402/core/server";
+export type { RouteValidationError } from "@aeon-ai-pay/core/server";
 
 export { HonoAdapter } from "./adapter";

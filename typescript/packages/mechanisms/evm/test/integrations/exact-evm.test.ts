@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { x402Client, x402HTTPClient } from "@x402/core/client";
-import { x402Facilitator } from "@x402/core/facilitator";
+import { x402Client, x402HTTPClient } from "@aeon-ai-pay/core/client";
+import { x402Facilitator } from "@aeon-ai-pay/core/facilitator";
 import {
   HTTPAdapter,
   HTTPResponseInstructions,
   x402HTTPResourceServer,
   x402ResourceServer,
   FacilitatorClient,
-} from "@x402/core/server";
+} from "@aeon-ai-pay/core/server";
 import {
   Network,
   PaymentPayload,
@@ -15,7 +15,7 @@ import {
   VerifyResponse,
   SettleResponse,
   SupportedResponse,
-} from "@x402/core/types";
+} from "@aeon-ai-pay/core/types";
 import { ExactEvmScheme as ExactEvmClient, toFacilitatorEvmSigner } from "../../src";
 import { ExactEvmScheme as ExactEvmServer } from "../../src/exact/server/scheme";
 import { ExactEvmScheme as ExactEvmFacilitator } from "../../src/exact/facilitator/scheme";

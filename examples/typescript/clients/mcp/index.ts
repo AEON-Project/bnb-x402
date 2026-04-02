@@ -9,12 +9,12 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import axios from "axios";
 import { config } from "dotenv";
-import { x402Client, wrapAxiosWithPayment } from "@x402/axios";
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
+import { x402Client, wrapAxiosWithPayment } from "@aeon-ai-pay/axios";
+import { registerExactEvmScheme } from "@aeon-ai-pay/evm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 import { createWalletClient, http, publicActions } from "viem";
 import { bsc, xLayer } from "viem/chains";
-import { toClientEvmSigner } from "@x402/evm";
+import { toClientEvmSigner } from "@aeon-ai-pay/evm";
 
 config();
 

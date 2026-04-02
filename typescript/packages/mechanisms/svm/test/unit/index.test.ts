@@ -14,7 +14,7 @@ import {
 } from "../../src/index";
 import { ExactSvmScheme as ServerExactSvmScheme } from "../../src/exact/server/scheme";
 
-describe("@x402/svm", () => {
+describe("@aeon-ai-pay/svm", () => {
   it("should export main classes", () => {
     expect(ExactSvmScheme).toBeDefined();
     expect(ExactSvmScheme).toBeDefined();

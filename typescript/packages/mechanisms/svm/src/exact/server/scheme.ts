@@ -5,7 +5,7 @@ import type {
   Price,
   SchemeNetworkServer,
   MoneyParser,
-} from "@x402/core/types";
+} from "@aeon-ai-pay/core/types";
 import { convertToTokenAmount, getUsdcAddress } from "../../utils";
 
 /**

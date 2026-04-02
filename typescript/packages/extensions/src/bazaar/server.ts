@@ -1,5 +1,5 @@
-import type { ResourceServerExtension } from "@x402/core/types";
-import type { HTTPRequestContext } from "@x402/core/http";
+import type { ResourceServerExtension } from "@aeon-ai-pay/core/types";
+import type { HTTPRequestContext } from "@aeon-ai-pay/core/http";
 import { BAZAAR } from "./types";
 
 /**

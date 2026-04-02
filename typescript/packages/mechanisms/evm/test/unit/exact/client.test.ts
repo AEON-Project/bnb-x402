@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ExactEvmScheme } from "../../../src/exact/client/scheme";
 import type { ClientEvmSigner } from "../../../src/signer";
-import { PaymentRequirements } from "@x402/core/types";
+import { PaymentRequirements } from "@aeon-ai-pay/core/types";
 
 describe("ExactEvmScheme (Client)", () => {
   let client: ExactEvmScheme;

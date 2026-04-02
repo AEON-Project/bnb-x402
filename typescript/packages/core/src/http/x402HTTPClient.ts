@@ -61,12 +61,12 @@ export class x402HTTPClient {
       return decodePaymentRequiredHeader(paymentRequired);
     }
 
-    // v1
+    // v1 or v2 in body (e.g., Python FastAPI server returns payment requirements in JSON body)
     if (
       body &&
       body instanceof Object &&
       "x402Version" in body &&
-      (body as PaymentRequired).x402Version === 1
+      "accepts" in body
     ) {
       return body as PaymentRequired;
     }

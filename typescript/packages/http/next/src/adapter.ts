@@ -1,4 +1,4 @@
-import { HTTPAdapter } from "@x402/core/server";
+import { HTTPAdapter } from "@aeon-ai-pay/core/server";
 import { NextRequest } from "next/server";
 
 /**

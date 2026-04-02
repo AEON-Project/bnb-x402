@@ -1,4 +1,4 @@
-import { PaymentPayload, PaymentRequirements, SchemeNetworkClient } from "@x402/core/types";
+import { PaymentPayload, PaymentRequirements, SchemeNetworkClient } from "@aeon-ai-pay/core/types";
 import { encodeFunctionData, getAddress, Hex } from "viem";
 import {
   aeonAuthorizationPrimaryType,

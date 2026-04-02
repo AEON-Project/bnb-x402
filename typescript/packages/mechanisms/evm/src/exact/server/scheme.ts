@@ -5,7 +5,7 @@ import {
   Price,
   SchemeNetworkServer,
   MoneyParser,
-} from "@x402/core/types";
+} from "@aeon-ai-pay/core/types";
 
 /**
  * EVM server implementation for the Exact payment scheme.

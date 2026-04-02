@@ -5,8 +5,8 @@ import {
   RoutesConfig,
   RouteConfig,
   FacilitatorClient,
-} from "@x402/core/server";
-import { SchemeNetworkServer, Network } from "@x402/core/types";
+} from "@aeon-ai-pay/core/server";
+import { SchemeNetworkServer, Network } from "@aeon-ai-pay/core/types";
 import { NextRequest, NextResponse } from "next/server";
 import {
   createHttpServer,
@@ -46,9 +46,9 @@ export interface SchemeRegistration {
  *
  * @example
  * ```typescript
- * import { paymentProxy } from "@x402/next";
- * import { x402ResourceServer } from "@x402/core/server";
- * import { registerExactEvmScheme } from "@x402/evm/exact/server";
+ * import { paymentProxy } from "@aeon-ai-pay/next";
+ * import { x402ResourceServer } from "@aeon-ai-pay/core/server";
+ * import { registerExactEvmScheme } from "@aeon-ai-pay/evm/exact/server";
  *
  * const server = new x402ResourceServer(myFacilitatorClient);
  * registerExactEvmScheme(server, {});
@@ -68,7 +68,7 @@ export function paymentProxy(
   // Dynamically register bazaar extension if routes declare it
   let bazaarPromise: Promise<void> | null = null;
   if (checkIfBazaarNeeded(routes)) {
-    bazaarPromise = import(/* webpackIgnore: true */ "@x402/extensions/bazaar")
+    bazaarPromise = import(/* webpackIgnore: true */ "@aeon-ai-pay/extensions/bazaar")
       .then(({ bazaarResourceServerExtension }) => {
         server.registerExtension(bazaarResourceServerExtension);
       })
@@ -134,7 +134,7 @@ export function paymentProxy(
  *
  * @example
  * ```typescript
- * import { paymentProxyFromConfig } from "@x402/next";
+ * import { paymentProxyFromConfig } from "@aeon-ai-pay/next";
  *
  * export const proxy = paymentProxyFromConfig(
  *   routes,
@@ -183,9 +183,9 @@ export function paymentProxyFromConfig(
  * @example
  * ```typescript
  * import { NextRequest, NextResponse } from "next/server";
- * import { withX402 } from "@x402/next";
- * import { x402ResourceServer } from "@x402/core/server";
- * import { registerExactEvmScheme } from "@x402/evm/exact/server";
+ * import { withX402 } from "@aeon-ai-pay/next";
+ * import { x402ResourceServer } from "@aeon-ai-pay/core/server";
+ * import { registerExactEvmScheme } from "@aeon-ai-pay/evm/exact/server";
  *
  * const server = new x402ResourceServer(myFacilitatorClient);
  * registerExactEvmScheme(server, {});
@@ -223,7 +223,7 @@ export function withX402<T = unknown>(
   // Dynamically register bazaar extension if route declares it
   let bazaarPromise: Promise<void> | null = null;
   if (checkIfBazaarNeeded(routes)) {
-    bazaarPromise = import(/* webpackIgnore: true */ "@x402/extensions/bazaar")
+    bazaarPromise = import(/* webpackIgnore: true */ "@aeon-ai-pay/extensions/bazaar")
       .then(({ bazaarResourceServerExtension }) => {
         server.registerExtension(bazaarResourceServerExtension);
       })
@@ -294,12 +294,12 @@ export type {
   PaymentPayload,
   Network,
   SchemeNetworkServer,
-} from "@x402/core/types";
+} from "@aeon-ai-pay/core/types";
 
-export type { PaywallProvider, PaywallConfig, RouteConfig } from "@x402/core/server";
+export type { PaywallProvider, PaywallConfig, RouteConfig } from "@aeon-ai-pay/core/server";
 
-export { RouteConfigurationError } from "@x402/core/server";
+export { RouteConfigurationError } from "@aeon-ai-pay/core/server";
 
-export type { RouteValidationError } from "@x402/core/server";
+export type { RouteValidationError } from "@aeon-ai-pay/core/server";
 
 export { NextAdapter } from "./adapter";

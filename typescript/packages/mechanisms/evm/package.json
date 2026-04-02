@@ -1,6 +1,6 @@
 {
-  "name": "@x402/evm",
-  "version": "2.0.0",
+  "name": "@aeon-ai-pay/evm",
+  "version": "2.1.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/cjs/index.d.ts",
@@ -45,7 +45,7 @@
     "vitest": "^3.0.5"
   },
   "dependencies": {
-    "@x402/core": "workspace:*",
+    "@aeon-ai-pay/core": "workspace:*",
     "viem": "^2.39.3",
     "ethers": "^6.16.0",
     "megafuel-js-sdk": "^1.0.7",
@@ -135,5 +135,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
