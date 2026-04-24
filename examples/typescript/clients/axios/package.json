@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@scure/base": "^1.2.6",
-    "@solana/kit": "^2.1.1",
+    "@solana/kit": "^2.1.2",
     "@aeon-ai-pay/axios": "workspace:*",
     "@aeon-ai-pay/evm": "workspace:*",
     "@aeon-ai-pay/svm": "workspace:*",
