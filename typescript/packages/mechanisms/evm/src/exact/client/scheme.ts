@@ -162,18 +162,20 @@ export class ExactEvmScheme implements SchemeNetworkClient {
     })) as bigint;
 
     const requiredAmount = BigInt(authorization.value);
+    // 一次性授权无限额度，后续支付无需再 approve（省 BNB gas）
+    const MAX_UINT256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
     if (currentAllowance < requiredAmount) {
       const approveData = encodeFunctionData({
         abi: ERC20_ABI,
         functionName: "approve",
-        args: [facilitatorAddress, requiredAmount],
+        args: [facilitatorAddress, MAX_UINT256],
       });
       const  tx=await this.signer.sendTransaction({
         to: getAddress(requirements.asset),
         data: approveData,
       });
 
-      console.log(" Wait for approval transaction to be confirmed requiredAmount:",requiredAmount)
+      console.log(" Wait for approval transaction to be confirmed (unlimited allowance)")
       // Wait for approval transaction to be confirmed
       const approvalReceipt = await this.signer.waitForTransactionReceipt({
         hash: tx,
