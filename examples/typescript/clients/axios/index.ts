@@ -4,9 +4,10 @@ import { registerExactEvmScheme } from "@x402/evm/exact/client";
 import { toClientEvmSigner } from "@x402/evm";
 import { privateKeyToAccount } from "viem/accounts";
 import { createWalletClient, http, publicActions } from "viem";
-import {bsc, xLayer} from "viem/chains";
+import {arbitrum, bsc, xLayer} from "viem/chains";
 import { kite } from "@x402/evm/custom-chains";
 import { bscTest } from "@x402/evm/custom-chains";
+import { aeon } from "@x402/evm/custom-chains";
 import axios from "axios";
 
 config();
@@ -30,7 +31,7 @@ async function main(): Promise<void> {
   const evmAccount = privateKeyToAccount(evmPrivateKey);
   const walletClient = createWalletClient({
     account: evmAccount,
-    chain: bscTest,
+    chain: aeon,
     transport: http(),
   }).extend(publicActions);
 
@@ -52,7 +53,9 @@ async function main(): Promise<void> {
   });
 
   const client = new x402Client();
-  registerExactEvmScheme(client, { signer: evmSigner });
+  // 限定只在 AEON Chain 上付款：不限定的话注册的是 eip155:* 通配，
+  // 默认 selector 会取服务端 accepts 的第一条，可能选到 walletClient 之外的链
+  registerExactEvmScheme(client, { signer: evmSigner, networks: ["eip155:10025"] });
   // registerExactSvmScheme(client, { signer: svmSigner });
 
   const api = wrapAxiosWithPayment(axios.create(), client);

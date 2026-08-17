@@ -47,6 +47,30 @@ app.use(
     {
       "GET /weather": {
         accepts: [
+          {
+            scheme: "exact",
+            // AEON Chain 的 USDTEST。该代币没有 transferWithAuthorization，客户端会自动
+            // 落到 needApprove 路径：签名 domain 用的是 Facilitator 合约
+            // (0x555e3311…, name="Facilitator" version="1")，这里的 extra 只是必填校验。
+            price: {
+              asset: "0x27F5D486751721591537b6675247df11A17b0889",
+              amount: "1000000000000000", // 0.001 USDTEST (18 decimals)
+              extra: { name: "USDTEST", version: "1" },
+            },
+            network: "eip155:10025",
+            payTo: evmAddress,
+          },
+          {
+            scheme: "exact",
+            // Arbitrum One 原生 USDC，链上读到的 EIP-712 domain 是 name="USD Coin" version="2"
+            price: {
+              asset: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+              amount: "1000", // 0.001 USDC (6 decimals)
+              extra: { name: "USD Coin", version: "2" },
+            },
+            network: "eip155:42161",
+            payTo: evmAddress,
+          },
           // {
           //   scheme: "exact",
           //   price: "$0.001",
@@ -76,7 +100,7 @@ app.use(
             price: "$0.001",
             network: "eip155:8453",
             payTo: evmAddress,
-          }
+          },
         ],
         description: "Weather data",
         mimeType: "application/json",
@@ -88,6 +112,8 @@ app.use(
         .register("eip155:8453", new ExactEvmScheme())
         .register("eip155:2366", new ExactEvmScheme())
         .register("eip155:97", new ExactEvmScheme())
+        .register("eip155:42161", new ExactEvmScheme())
+        .register("eip155:10025", new ExactEvmScheme())
   ),
 );
 
